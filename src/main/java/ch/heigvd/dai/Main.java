@@ -9,6 +9,12 @@ public class Main {
   public static void main(String[] args) {
     Javalin app = Javalin.create();
 
+    Sqlite databse = new Sqlite();
+    try {
+      databse.init();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     app.get("/ping", ctx -> ctx.result("pong"));
     // Partie user
     app.get("/user", ctx -> ctx.result("list of user"));
