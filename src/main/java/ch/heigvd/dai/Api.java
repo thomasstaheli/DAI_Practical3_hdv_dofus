@@ -1,6 +1,7 @@
 package ch.heigvd.dai;
 
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 
 public class Api {
     private final Javalin app;
@@ -11,12 +12,16 @@ public class Api {
         this.database = database;
     }
 
+    public static void getMe(Context ctx) {
+        ctx.result("My user");
+    }
+
     public void start(int port) {
         app.get("/ping", ctx -> ctx.result("pong"));
         // Partie user
         app.get("/user", ctx -> ctx.result("list of user"));
 
-        app.get("/user/me", Main::getMe);
+        app.get("/user/me", Api::getMe);
 
         // A enlever peut être (get un user (nom, prenom, ...))
         app.get("/user/{user_id}", ctx -> ctx.result("list of user items"));

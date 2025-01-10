@@ -27,8 +27,4 @@ public class Main {
       System.err.println(e.getMessage());
     }
   }
-
-  public static void getMe(Context ctx) {
-    ctx.result("My user");
-  }
 }
