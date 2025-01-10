@@ -1,19 +1,31 @@
 package ch.heigvd.dai.api;
 
+import ch.heigvd.dai.api.auth.Auth;
 import ch.heigvd.dai.api.users.User;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.Javalin;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 public class Api {
     private final Javalin app;
     private final Sqlite database;
+    private final Auth auth;
 
-    public Api(Sqlite database) {
+    public Api(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         this.app = Javalin.create();
         this.database = database;
+        this.auth = new Auth();
     }
 
     public void start(int port) {
+        app.exception(Exception.class, (e, ctx) -> {
+            System.err.println(e.getMessage());
+            ctx.status(500).json(new Error("Internal Server Error"));
+        });
+
         app.get("/ping", ctx -> ctx.result("pong"));
         // Partie user
         app.get("/user", ctx -> ctx.result("list of user"));

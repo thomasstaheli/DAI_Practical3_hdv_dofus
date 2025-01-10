@@ -16,4 +16,32 @@ public class Auth {
     public void register(Context ctx) {
 
     }
+
+    public void login(Context ctx) {
+        String header = ctx.header("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            ctx.status(401).result("Unauthorized");
+            return;
+        }
+
+        String token = header.replace("Bearer ", "");
+        if (!this.jsonWebToken.isValid(token)) {
+            ctx.status(401).result("Unauthorized");
+            return;
+        }
+
+        // TODO ctx.json("Ok");
+    }
+
+    public void disconnect(Context ctx) {
+
+    }
+
+    public void protect(Context ctx) {
+
+    }
+
+    public int getMe(Context ctx) {
+        return -1;
+    }
 }
