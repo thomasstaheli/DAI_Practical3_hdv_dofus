@@ -6,7 +6,7 @@
     <target name="WSL" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="ch.heigvd.dai.*" />
+        <option name="PATTERN" value="ch.heigvd.dai.auth.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
