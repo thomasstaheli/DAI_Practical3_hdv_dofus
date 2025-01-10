@@ -1,6 +1,7 @@
 package ch.heigvd.dai;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,6 +16,9 @@ public class Sqlite implements AutoCloseable {
 
   public Sqlite() throws SQLException  {
     try {
+      File file = new File("./dofus_hdv.db");
+      if (file.exists()) file.delete();
+
       conn = DriverManager.getConnection("jdbc:sqlite:dofus_hdv.db");
       stmt = conn.createStatement();
     } catch (SQLException e) {
@@ -37,7 +41,7 @@ public class Sqlite implements AutoCloseable {
   }
 
 
-  public void executeSql(String sqlFilePath) throws IOException, SQLException {
+  private void executeSql(String sqlFilePath) throws IOException, SQLException {
     BufferedReader br = new BufferedReader(new FileReader(sqlFilePath));
 
     StringBuilder query = new StringBuilder();

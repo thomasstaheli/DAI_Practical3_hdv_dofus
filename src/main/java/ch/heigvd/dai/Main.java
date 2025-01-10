@@ -1,7 +1,5 @@
 package ch.heigvd.dai;
 
-import io.javalin.http.Context;
-
 import java.io.IOException;
 import java.sql.SQLException;
 
