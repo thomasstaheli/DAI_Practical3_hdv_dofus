@@ -19,3 +19,17 @@ INSERT INTO item (nom, description) VALUES
 ('Eau de Vie', 'Une boisson rare qui régénère instantanément la santé de l utilisateur.'),
 ('Hache du Bois', 'Une hache ordinaire utilisée pour couper du bois et fabriquer des objets.'),
 ('Gant de Cuir', 'Un gant de cuir souple qui protège les mains tout en maintenant une grande agilité.');
+
+INSERT INTO user (first_name, last_name, mdp) VALUES
+('Alice', 'Liddell', 'alice123'),
+('Bob', 'Builder', 'bob123');
+
+INSERT INTO invetory_user (user_id, item_id, quantity) VALUES
+(0, 0, 10),
+(0, 1, 10),
+(0, 2, 10),
+(0, 3, 10),
+(1, 0, 10),
+(1, 1, 10),
+(1, 2, 10),
+(1, 3, 10)

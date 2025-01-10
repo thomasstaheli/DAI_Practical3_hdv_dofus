@@ -1,5 +1,6 @@
 package ch.heigvd.dai.api;
 
+import ch.heigvd.dai.api.users.Inventory;
 import ch.heigvd.dai.api.users.User;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.Javalin;
@@ -24,6 +25,8 @@ public class Api {
         app.get("/user/{user_id}", ctx -> ctx.result("list of user items"));
         app.patch("/user/me", ctx -> ctx.result("Update one or more param of my user"));
         app.delete("/user/me", ctx -> ctx.result("To delete my account"));
+
+        app.get("/myinvetory/{user_id}", Inventory::getInventory);
 
         app.post("/register", ctx -> ctx.result("Création du compte"));
         app.post("/login", ctx -> ctx.result("Connextion"));
