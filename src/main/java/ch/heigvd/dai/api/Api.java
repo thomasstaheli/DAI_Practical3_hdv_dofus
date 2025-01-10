@@ -1,7 +1,8 @@
-package ch.heigvd.dai;
+package ch.heigvd.dai.api;
 
+import ch.heigvd.dai.api.users.User;
+import ch.heigvd.dai.database.Sqlite;
 import io.javalin.Javalin;
-import io.javalin.http.Context;
 
 public class Api {
     private final Javalin app;

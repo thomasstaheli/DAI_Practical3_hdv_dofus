@@ -1,5 +1,8 @@
 package ch.heigvd.dai;
 
+import ch.heigvd.dai.api.Api;
+import ch.heigvd.dai.database.Sqlite;
+
 import java.io.IOException;
 import java.sql.SQLException;
 

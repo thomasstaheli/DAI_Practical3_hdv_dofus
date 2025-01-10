@@ -1,4 +1,4 @@
-package ch.heigvd.dai;
+package ch.heigvd.dai.database;
 
 import java.io.BufferedReader;
 import java.io.File;

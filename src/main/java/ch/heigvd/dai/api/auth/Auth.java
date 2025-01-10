@@ -1,4 +1,4 @@
-package ch.heigvd.dai;
+package ch.heigvd.dai.api.auth;
 
 import io.javalin.http.Context;
 
