@@ -39,3 +39,5 @@ build/
 
 ### SQLITE ###
 *.db
+
+rsa
