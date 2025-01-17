@@ -12,7 +12,9 @@ public class Main {
   public static final int PORT = 8080;
 
   public static void main(String[] args) {
-    try (Sqlite database = new Sqlite()) {
+    try {
+      // TODO: close connection
+      Sqlite database = new Sqlite();
       for (String arg : args) {
         switch (arg) {
           case "--init":
