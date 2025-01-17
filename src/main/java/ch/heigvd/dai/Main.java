@@ -9,7 +9,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 
 public class Main {
-  public static final int PORT = 7000;
+  public static final int PORT = 8080;
 
   public static void main(String[] args) {
     try {

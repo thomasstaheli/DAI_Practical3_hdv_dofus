@@ -13,11 +13,13 @@ public class Api {
     private final Javalin app;
     private final Sqlite database;
     private final Auth auth;
+    private final User user;
 
     public Api(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         this.app = Javalin.create();
         this.database = database;
         this.auth = new Auth(database);
+        this.user = new User(database, auth);
     }
 
     public void start(int port) {
@@ -27,12 +29,12 @@ public class Api {
         // Partie user
         app.get("/user", ctx -> ctx.result("list of user"));
 
-        app.get("/user/me", User::getMe);
+        app.get("/users/me", user::getMe);
 
         // A enlever peut être (get un user (nom, prenom, ...))
-        app.get("/user/{user_id}", ctx -> ctx.result("list of user items"));
-        app.patch("/user/me", ctx -> ctx.result("Update one or more param of my user"));
-        app.delete("/user/me", ctx -> ctx.result("To delete my account"));
+        app.get("/users/{user_id}", ctx -> ctx.result("list of user items"));
+        app.patch("/users/me", ctx -> ctx.result("Update one or more param of my user"));
+        app.delete("/users/me", ctx -> ctx.result("To delete my account"));
 
         app.post("/register", auth::register);
         app.post("/login", auth::login);

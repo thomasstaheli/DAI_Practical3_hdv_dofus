@@ -57,7 +57,7 @@ public class Sqlite implements AutoCloseable {
     }
   }
 
-  private PreparedStatement prepareStatement(String query, Object[] args) throws SQLException {
+  public PreparedStatement prepare(String query, Object[] args) throws SQLException {
     PreparedStatement pstmt = conn.prepareStatement(query);
     for (int index = 0; index < args.length; index++) {
       if (args[index].getClass() == Integer.class) {
@@ -68,17 +68,5 @@ public class Sqlite implements AutoCloseable {
     }
 
     return pstmt;
-  }
-
-  public ResultSet select(String query, Object[] args) throws SQLException {
-    try (PreparedStatement pstmt = prepareStatement(query, args)) {
-      return pstmt.executeQuery();
-    }
-  }
-
-  public boolean insert(String query, Object[] args) throws SQLException {
-    try (PreparedStatement pstmt = prepareStatement(query, args)) {
-      return pstmt.execute();
-    }
   }
 }

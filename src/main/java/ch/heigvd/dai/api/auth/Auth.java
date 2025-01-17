@@ -9,6 +9,7 @@ import io.javalin.http.UnauthorizedResponse;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -24,12 +25,19 @@ public class Auth {
 
     public void register(Context ctx) throws SQLException {
         try {
-            AuthBody body = ctx.bodyValidator(AuthBody.class).check((o) -> o.username != null && o.password != null && !o.password.isEmpty(), "Invalid body").get();;
+            AuthBody body = ctx.bodyValidator(AuthBody.class).check((o) -> o.username != null && o.password != null && !o.password.isEmpty(), "Invalid body").get();
             // TODO: hash password
-            //ResultSet result = database.select("SELECT user_id FROM user WHERE username = ?", new Object[]{body.username()});
-            //if (result.next()) throw new ConflictResponse();
-            database.insert("INSERT INTO user(username, password) VALUES (?, ?)", new Object[]{body.username(), body.password()});
-            ctx.status(201).json("ok");
+            try (
+                PreparedStatement pstmt = database.prepare("SELECT user_id FROM user WHERE username = ?", new Object[]{body.username()});
+                ResultSet result = pstmt.executeQuery()
+            ) {
+                if (result.next()) throw new ConflictResponse();
+            }
+
+            try (PreparedStatement pstmt = database.prepare("INSERT INTO user(username, password) VALUES (?, ?)", new Object[]{body.username(), body.password()})) {
+                pstmt.execute();
+                ctx.status(201).json("ok");
+            }
         } catch (Exception e) {
             this.disconnect(ctx);
             throw e;
@@ -38,14 +46,17 @@ public class Auth {
 
     public void login(Context ctx) throws SQLException {
         try {
-            AuthBody body = ctx.bodyValidator(AuthBody.class).check((o) -> o.username != null && o.password != null && !o.password.isEmpty(), "Invalid body").get();;
+            AuthBody body = ctx.bodyValidator(AuthBody.class).check((o) -> o.username != null && o.password != null && !o.password.isEmpty(), "Invalid body").get();
             // TODO: hash password
-            ResultSet result = database.select("SELECT user_id FROM user WHERE username = ? AND password = ?", new Object[]{body.username(), body.password()});
-            if (!result.next()) throw new UnauthorizedResponse();
-            // TODO: fix
-            int id = result.getInt("user_id");
-            ctx.cookie("token", jsonWebToken.generate(id));
-            ctx.status(200).json("ok");
+            try (
+                PreparedStatement pstmt = database.prepare("SELECT user_id FROM user WHERE username = ? AND password = ?", new Object[]{body.username(), body.password()});
+                ResultSet result = pstmt.executeQuery()
+            ) {
+                if (!result.next()) throw new UnauthorizedResponse();
+                int id = result.getInt("user_id");
+                ctx.cookie("token", jsonWebToken.generate(id));
+                ctx.status(200).json("ok");
+            }
         } catch (Exception e) {
             this.disconnect(ctx);
             throw e;
