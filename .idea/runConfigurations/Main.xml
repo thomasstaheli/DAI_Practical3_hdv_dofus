@@ -3,7 +3,7 @@
     <option name="MAIN_CLASS_NAME" value="ch.heigvd.dai.Main" />
     <module name="21-http-and-curl" />
     <option name="PROGRAM_PARAMETERS" value="--init --seed" />
-    <target name="WSL" />
+    <target name="@@@LOCAL@@@" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="ch.heigvd.dai.*" />
