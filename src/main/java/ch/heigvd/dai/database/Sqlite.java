@@ -42,20 +42,45 @@ public class Sqlite implements AutoCloseable {
 
 
   private void executeSql(String sqlFilePath) throws IOException, SQLException {
-    BufferedReader br = new BufferedReader(new FileReader(sqlFilePath));
+    try (BufferedReader br = new BufferedReader(new FileReader(sqlFilePath))) {
+      StringBuilder query = new StringBuilder();
+      String line;
+      boolean insideBlock = false; // Pour suivre les blocs BEGIN ... END;
 
-    StringBuilder query = new StringBuilder();
-    String line;
+      while ((line = br.readLine()) != null) {
+        // Supprime les commentaires et les espaces inutiles
+        line = line.replaceAll("/\\*.*?\\*/", "").trim(); // Supprime les commentaires en bloc
+        if (line.startsWith("--") || line.isEmpty()) continue; // Ignore les commentaires en ligne
 
-    while((line = br.readLine()) != null) {
-      if (line.trim().startsWith("--")) continue;
+        // Vérifie le début d'un bloc (comme un trigger)
+        if (line.toUpperCase().startsWith("BEGIN")) {
+          insideBlock = true;
+        }
 
-      query.append(line).append(" ");
+        // Ajoute la ligne au buffer
+        query.append(line).append(" ");
 
-      if(line.trim().endsWith(";")) {
-        stmt.execute(query.toString().trim());
-        query = new StringBuilder();
+        // Vérifie la fin du bloc (END;)
+        if (insideBlock && line.trim().endsWith("END;")) {
+          insideBlock = false; // Fin du bloc
+        }
+
+        // Si ce n'est pas un bloc, exécute la requête à chaque point-virgule
+        if (!insideBlock && line.trim().endsWith(";")) {
+          executeQuery(query.toString().trim());
+          query = new StringBuilder(); // Réinitialise le buffer
+        }
       }
     }
   }
+
+  private void executeQuery(String sql) {
+    try {
+      stmt.execute(sql); // Exécute la requête
+    } catch (SQLException e) {
+      System.err.println("Erreur SQL : " + e.getMessage());
+      System.err.println("Requête fautive : " + sql);
+    }
+  }
+
 }
