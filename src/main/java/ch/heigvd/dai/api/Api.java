@@ -17,14 +17,11 @@ public class Api {
     public Api(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         this.app = Javalin.create();
         this.database = database;
-        this.auth = new Auth();
+        this.auth = new Auth(database);
     }
 
     public void start(int port) {
-        app.exception(Exception.class, (e, ctx) -> {
-            System.err.println(e.getMessage());
-            ctx.status(500).json(new Error("Internal Server Error"));
-        });
+        app.before(auth::protect);
 
         app.get("/ping", ctx -> ctx.result("pong"));
         // Partie user
@@ -37,8 +34,9 @@ public class Api {
         app.patch("/user/me", ctx -> ctx.result("Update one or more param of my user"));
         app.delete("/user/me", ctx -> ctx.result("To delete my account"));
 
-        app.post("/register", ctx -> ctx.result("Création du compte"));
-        app.post("/login", ctx -> ctx.result("Connextion"));
+        app.post("/register", auth::register);
+        app.post("/login", auth::login);
+        app.get("/disconnect", auth::disconnect);
 
         // Partie hdv
         // Pour récuérer les offres d'un user avec /hdv?id=41
