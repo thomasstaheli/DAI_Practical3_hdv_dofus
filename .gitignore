@@ -40,4 +40,5 @@ build/
 ### SQLITE ###
 *.db
 
-rsa
+rsa/*
+!rsa/.gitkeep
