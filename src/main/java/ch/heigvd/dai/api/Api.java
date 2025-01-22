@@ -34,11 +34,11 @@ public class Api {
 
         // Users
         app.get("/users", user::getAll);
-        app.get("/users/{id}", user::getOne);
         app.get("/users/me", user::getMe);
         app.put("/users/me", user::partialUpdateMe);
         app.patch("/users/me", user::updateMe);
         app.delete("/users/me", user::removeMe);
+        app.get("/users/{id}", user::getOne);
 
 
         // Partie hdv

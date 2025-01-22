@@ -5,6 +5,7 @@ import ch.heigvd.dai.api.auth.Auth;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.http.Context;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,7 +52,7 @@ public class User {
         return ctx.status(200).json(Status.ok());
     }
 
-    public Context partialUpdateMe(Context ctx) throws SQLException {
+    public Context partialUpdateMe(Context ctx) throws SQLException, NoSuchAlgorithmException {
         Auth.AuthBody body = Auth.AuthBody.partial(ctx);
 
         StringBuilder query = new StringBuilder("UPDATE user SET ");
@@ -65,8 +66,7 @@ public class User {
         }
         if (body.password() != null) {
             query.append("password = ?, ");
-            params.add(body.password());
-            // TODO: hash password
+            params.add(Auth.hash(body.password()));
             hasUpdates = true;
         }
 
@@ -85,12 +85,11 @@ public class User {
         return ctx.status(200).json(Status.ok());
     }
 
-    public Context updateMe(Context ctx) throws SQLException {
+    public Context updateMe(Context ctx) throws SQLException, NoSuchAlgorithmException {
         Auth.AuthBody body = Auth.AuthBody.full(ctx);
 
-        // TODO: hash passord
         try (
-                PreparedStatement pstmt = database.prepare("UPDATE user SET username = ?, password = ? WHERE user_id = ?", new Object[]{body.username(), body.password(), auth.getMe(ctx)});
+                PreparedStatement pstmt = database.prepare("UPDATE user SET username = ?, password = ? WHERE user_id = ?", new Object[]{body.username(), Auth.hash(body.password()), auth.getMe(ctx)});
         ) {
             pstmt.execute();
         }

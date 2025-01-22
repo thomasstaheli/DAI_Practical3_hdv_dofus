@@ -13,10 +13,6 @@ public class Sqlite implements AutoCloseable {
 
   public Sqlite() throws SQLException  {
     try {
-      // TODO only if --init
-      File file = new File("./dofus_hdv.db");
-      if (file.exists()) file.delete();
-
       conn = DriverManager.getConnection("jdbc:sqlite:dofus_hdv.db");
       stmt = conn.createStatement();
     } catch (SQLException e) {
