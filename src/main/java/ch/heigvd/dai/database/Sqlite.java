@@ -13,10 +13,6 @@ public class Sqlite implements AutoCloseable {
 
   public Sqlite() throws SQLException  {
     try {
-      // TODO only if --init
-      File file = new File("./dofus_hdv.db");
-      if (file.exists()) file.delete();
-
       conn = DriverManager.getConnection("jdbc:sqlite:dofus_hdv.db");
       stmt = conn.createStatement();
     } catch (SQLException e) {
@@ -43,41 +39,27 @@ public class Sqlite implements AutoCloseable {
     try (BufferedReader br = new BufferedReader(new FileReader(sqlFilePath))) {
       StringBuilder query = new StringBuilder();
       String line;
-      boolean insideBlock = false; // Pour suivre les blocs BEGIN ... END;
+      boolean insideBlock = false;
 
       while ((line = br.readLine()) != null) {
-        // Supprime les commentaires et les espaces inutiles
-        line = line.replaceAll("/\\*.*?\\*/", "").trim(); // Supprime les commentaires en bloc
-        if (line.startsWith("--") || line.isEmpty()) continue; // Ignore les commentaires en ligne
+        line = line.trim();
+        if (line.startsWith("--") || line.isEmpty()) continue;
 
-        // Vérifie le début d'un bloc (comme un trigger)
-        if (line.toUpperCase().startsWith("BEGIN")) {
+        if (line.startsWith("BEGIN")) {
           insideBlock = true;
         }
 
-        // Ajoute la ligne au buffer
         query.append(line).append(" ");
 
-        // Vérifie la fin du bloc (END;)
-        if (insideBlock && line.trim().endsWith("END;")) {
-          insideBlock = false; // Fin du bloc
+        if (insideBlock && line.endsWith("END;")) {
+          insideBlock = false;
         }
 
-        // Si ce n'est pas un bloc, exécute la requête à chaque point-virgule
-        if (!insideBlock && line.trim().endsWith(";")) {
-          executeQuery(query.toString().trim());
-          query = new StringBuilder(); // Réinitialise le buffer
+        if (!insideBlock && line.endsWith(";")) {
+          stmt.execute(query.toString());
+          query = new StringBuilder();
         }
       }
-    }
-  }
-
-  private void executeQuery(String sql) {
-    try {
-      stmt.execute(sql); // Exécute la requête
-    } catch (SQLException e) {
-      System.err.println("Erreur SQL : " + e.getMessage());
-      System.err.println("Requête fautive : " + sql);
     }
   }
 
@@ -93,5 +75,4 @@ public class Sqlite implements AutoCloseable {
 
     return pstmt;
   }
-
 }

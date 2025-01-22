@@ -26,19 +26,20 @@ public class Api {
         app.before(auth::protect);
 
         app.get("/ping", ctx -> ctx.result("pong"));
-        // Partie user
-        app.get("/user", ctx -> ctx.result("list of user"));
 
-        app.get("/users/me", user::getMe);
-
-        // A enlever peut être (get un user (nom, prenom, ...))
-        app.get("/users/{user_id}", ctx -> ctx.result("list of user items"));
-        app.patch("/users/me", ctx -> ctx.result("Update one or more param of my user"));
-        app.delete("/users/me", ctx -> ctx.result("To delete my account"));
-
+        // Authentication
         app.post("/register", auth::register);
         app.post("/login", auth::login);
         app.get("/disconnect", auth::disconnect);
+
+        // Users
+        app.get("/users", user::getAll);
+        app.get("/users/me", user::getMe);
+        app.put("/users/me", user::partialUpdateMe);
+        app.patch("/users/me", user::updateMe);
+        app.delete("/users/me", user::removeMe);
+        app.get("/users/{id}", user::getOne);
+
 
         // Partie hdv
         // Pour récuérer les offres d'un user avec /hdv?id=41
