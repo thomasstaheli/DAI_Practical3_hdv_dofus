@@ -549,17 +549,135 @@ Common errors include:
 
 ---
 
-## Virtual Machine Setup
-To set up a virtual machine:
+## Some examples with curl
 
-1. Install VirtualBox and Vagrant.
-2. Clone the repository.
-3. Run:
-   ```bash
-   vagrant up
-   vagrant ssh
-   ```
+### 1. POST /register - Register a new user
+```bash
+curl -X POST http://localhost:8080/register \
+-H "Content-Type: application/json" \
+-d '{
+  "username": "newuser",
+  "password": "securepassword"
+}'
+```
+#### Expected response
+```json
+{
+    "status": "ok"
+}
+```
 
+### 2. POST /connect - Log in and get a token
+
+```bash
+curl -X POST http://localhost:8080/connect \
+-H "Content-Type: application/json" \
+-d '{
+  "username": "newuser",
+  "password": "securepassword"
+}'
+```
+#### Expected response
+```json
+{
+    "status": "ok"
+}
+```
+
+### 3. GET /myinventory - Get the user's inventory
+
+```bash
+curl -X GET http://localhost:8080/myinventory
+```
+#### Example response
+```json
+[
+    {
+        "id": 1,
+        "nom": "Dofus Pourpre",
+        "quantity": 10
+    },
+    {
+        "id": 2,
+        "nom": "Gelano PA/PM",
+        "quantity": 12
+    }
+]
+```
+
+### 4. POST /hdv - Create a new offe
+```bash
+curl -X POST http://localhost:8080/hdv \
+-H "Content-Type: application/json" \
+-d '{
+  "itemId": 1,
+  "price": 500,
+  "amount": 10
+}'
+```
+#### Expected response
+```json
+{
+    "status": "ok"
+}
+```
+
+## Create a virtual machine
+
+Return to the Azure portal and create a new virtual machine from the dashboard in section Create a resource.
+
+Select a virtual machine with the following characteristics:
+
+    Project details
+        Subscription: Azure for Students
+        Resource group: Create new with the name heig-vd-dai-course
+    Instance details
+        Virtual machine name: heig-vd-dai-course-vm
+        Region: (Europe) West Europe
+        Availability options: No infrastructure redundancy required
+        Security type: Trusted launch virtual machines (the default)
+        Image: Ubuntu Server 24.04 LTS - x64 Gen2 (the default)
+        VM architecture: x64
+        Size: Standard_B1s - you might need to click "See all sizes" to see this option
+    Administrator account
+        Authentication type: SSH public key
+        Username: ubuntu - please use this username so the teaching staff can help you if needed
+        SSH public key source: Use existing public key
+        SSH public key: Paste your public key here - see the note below for more information
+    Inbound port rules
+        Public inbound ports: Allow selected ports
+        Select inbound ports: HTTP (80), HTTPS (443), SSH (22)
+        
+Click on the Review + create button.
+
+Validate the configuration and click on the Create button.
+Access and configure the virtual machine
+
+In this section, you will access the virtual machine with SSH and configure it.
+Access the virtual machine with SSH
+
+### Connect to the virtual machine with SSH
+```bash
+ssh ubuntu@<20.56.21.202>
+```
+
+Update and secure the virtual machine
+
+### Update the available packages
+```bash
+sudo apt update
+```
+
+### Upgrade the packages
+```bash
+sudo apt upgrade
+```
+
+### Reboot the virtual machine
+You can then reboot the virtual machine with the following command to apply all the updates:
+```bash
+sudo reboot
+```
 ---
 
 ## DNS Configuration
@@ -572,11 +690,81 @@ CNAME record -> www.example.com -> example.com
 
 ---
 
-## Deployment with Docker Compose
+## Deployment with Docker & Docker Compose
 
 1. Install Docker and Docker Compose.
 2. Clone the repository.
 3. Run the following command:
+
+### Docker
+#### Pull l'image docker
+```bash
+docker pull ghcr.io/leonardjouve/pass-secure
+```
+
+#### Launching the Server
+```bash
+docker run -p <port>:6433 ghcr.io/leonardjouve/pass-secure server --vault <vault> --thread <amount>
+```
+
+#### Lancer le client
+```bash
+docker run -it ghcr.io/leonardjouve/pass-secure client --host <host> --port <port>
+```
+
+#### Exemple d'utilisation en local:
+#### Lancer le serveur
+```bash
+docker run -p 6433:6433 ghcr.io/leonardjouve/pass-secure server
+```
+
+#### Réccupérer son ip locale
+```bash
+ifconfig
+
+eth0:   ...
+        inet 172.25.198.170  ...
+        ...
+```
+
+Lancer le client
+```bash
+docker run -it ghcr.io/leonardjouve/pass-secure client --host 172.25.198.170
+```
+
+### Publishing Your Own Docker Image
+#### 1. Compile the Project:
+```bash
+chmod +x ./mvnw
+./mvnw spotless:apply spotless:check dependency:go-offline clean compile package
+```
+
+#### 2. Create a Docker Image
+```bash
+docker build -t web-application .
+```
+
+#### 3. Log in to GitHub Container Registry
+```bash
+docker login ghcr.io -u <username>
+```
+
+#### 4. Tag the Image
+```bash
+docker tag pass-secure ghcr.io/<username>/pass-secure:latest
+```
+
+#### 5. Push the Image
+```bash
+docker push ghcr.io/<username>/pass-secure
+```
+
+The created Docker image can then be retrieved using the command:
+```bash
+docker pull ghcr.io/<username>/pass-secure
+```
+
+### Docker compose
 
 ```bash
 docker-compose up --build -d
