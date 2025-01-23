@@ -691,14 +691,18 @@ ping dofus-hdv.duckdns.org
 
 ## Deployment with Docker & Docker Compose
 
-1. Install Docker and Docker Compose.
+1. Install Docker and Docker Compose (follow those steps : [Install docker](https://docs.docker.com/engine/install/ubuntu/).
 2. Clone the repository.
-3. Run the following command:
+```bash
+git clone https://github.com/thomasstaheli/DAI_Practical3_hdv_dofus.git
+```
+
+4. Run the following command:
 
 ### Docker
 #### Pull l'image docker
 ```bash
-docker pull ghcr.io/leonardjouve/pass-secure
+docker pull ghcr.io/leonardjouve/dofus-hdv
 ```
 
 #### Launching the Server
