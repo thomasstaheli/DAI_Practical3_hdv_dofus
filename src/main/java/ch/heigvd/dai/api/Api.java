@@ -5,6 +5,7 @@ import ch.heigvd.dai.api.users.Inventory;
 import ch.heigvd.dai.api.users.User;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.Javalin;
+import io.javalin.http.InternalServerErrorResponse;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +27,11 @@ public class Api {
     }
 
     public void start(int port) {
+
+        app.exception(Exception.class, (e, ctx) -> {
+            throw new InternalServerErrorResponse();
+        });
+
         app.before(auth::protect);
 
         app.get("/ping", ctx -> ctx.result("pong"));
@@ -45,6 +51,10 @@ public class Api {
 
         // Partie inventaire
         app.get("/myinventory", inventoryController::getInventory);
+        app.post("/myinventory", inventoryController::insertItem);
+        app.delete("/myinventory/{item_id}", inventoryController::deleteItem);
+        app.patch("/myinventory", inventoryController::partialUpdateItem);
+        app.put("/myinventory", inventoryController::updateItem);
 
         // Partie hdv
         // Pour récuérer les offres d'un user avec /hdv?id=41

@@ -28,6 +28,22 @@ public class Inventory {
     }
   }
 
+  public record InventoryBody(Integer item_id, Integer quantity) {
+    public static InventoryBody full(Context ctx) {
+      return ctx.bodyValidator(InventoryBody.class).check((o) -> o.item_id != null &&
+              o.quantity != null && o.quantity > 0 && o.item_id > 0, "Invalid body").get();
+    }
+  }
+
+  public record InventoryUpdateBody(Integer price, Integer amount) {
+    public static InventoryUpdateBody full(Context ctx) {
+      return ctx.bodyValidator(InventoryUpdateBody.class).check((o) -> o.price != null && o.amount != null && o.price > 0 && o.amount > 0, "Invalid body").get();
+    }
+    public static InventoryUpdateBody partial(Context ctx) {
+      return ctx.bodyValidator(InventoryUpdateBody.class).check((o) -> (o.price == null || o.price > 0) && (o.amount == null || o.amount > 0), "Invalid body").get();
+    }
+  }
+
   public Inventory(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
     this.database = database;
     this.auth = new Auth(database);
@@ -56,7 +72,46 @@ public class Inventory {
     return ctx;
   }
 
-  public void insertItem(Context ctx) {
+  public void insertItem(Context ctx) throws SQLException {
+    InventoryBody body = InventoryBody.full(ctx);
+
+    try (PreparedStatement preparedStatement = database.prepare(
+      "INSERT INTO inventory_user (user_id, item_id, quantity) VALUES (?, ?, ?)",
+            new Object[]{auth.getMe(ctx), body.item_id, body.quantity})) {
+
+      preparedStatement.execute();
+      ctx.status(201).result("SUCCES : Item added to inventory");
+    }
+
+  }
+
+  public void deleteItem(Context ctx) throws SQLException {
+    int item_id = Integer.parseInt(ctx.pathParam("item_id"));
+    System.out.println("Oui");
+    try (PreparedStatement preparedStatement = database.prepare(
+      "DELETE FROM inventory_user WHERE user_id = ? AND item_id = ?",
+            new Object[]{auth.getMe(ctx), item_id})) {
+
+      preparedStatement.execute();
+      ctx.status(200).result("SUCCES : Item deleted from inventory");
+    }
+
+  }
+
+  public void updateItem(Context ctx) throws SQLException {
+    InventoryBody body = InventoryBody.full(ctx);
+
+    try (PreparedStatement preparedStatement = database.prepare(
+      "UPDATE inventory_user SET quantity = ? WHERE user_id = ? AND item_id = ?",
+            new Object[]{body.quantity, auth.getMe(ctx), body.item_id})) {
+
+      preparedStatement.execute();
+      ctx.status(200).result("SUCCES : Item updated in inventory");
+    }
+
+  }
+
+  public void partialUpdateItem(Context ctx) throws SQLException {
 
   }
 }
