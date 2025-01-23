@@ -52,7 +52,8 @@ public class User {
         try (
                 PreparedStatement pstmt = database.prepare("DELETE FROM user WHERE user_id = ?", new Object[]{auth.getMe(ctx)})
         ) {
-            pstmt.execute();
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected == 0) throw new NotFoundResponse();
             cacher.removeCache(String.valueOf(auth.getMe(ctx)));
             cacher.setLastModified("ALL");
             ctx.status(200).json(Status.ok());
@@ -82,7 +83,8 @@ public class User {
             try (
                     PreparedStatement pstmt = database.prepare(query.toString(), params.toArray())
             ) {
-                pstmt.execute();
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected == 0) throw new NotFoundResponse();
                 cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
                 cacher.setLastModified("ALL");
             }
@@ -97,7 +99,8 @@ public class User {
         try (
                 PreparedStatement pstmt = database.prepare("UPDATE user SET username = ?, password = ? WHERE user_id = ?", new Object[]{body.username(), Auth.hash(body.password()), auth.getMe(ctx)})
         ) {
-          pstmt.execute();
+          int rowsAffected = pstmt.executeUpdate();
+          if (rowsAffected == 0) throw new NotFoundResponse();
           cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
           cacher.setLastModified("ALL");
           ctx.status(200).json(Status.ok());

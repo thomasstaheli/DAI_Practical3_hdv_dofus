@@ -99,7 +99,8 @@ public class Hdv {
         try (
                 PreparedStatement pstmt = database.prepare("UPDATE offer SET buyer_id = ? WHERE offer_id = ?", new Object[]{auth.getMe(ctx), id})
         ) {
-            pstmt.execute();
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected == 0) throw new NotFoundResponse();
             cacher.removeCache(String.valueOf(id));
             cacher.setLastModified("ALL");
             try (ResultSet result = pstmt.getResultSet()) {
@@ -122,7 +123,8 @@ public class Hdv {
         try (
                 PreparedStatement pstmt = database.prepare("DELETE FROM offer WHERE offer_id = ? AND user_id = ?", new Object[]{id, auth.getMe(ctx)})
         ) {
-            pstmt.execute();
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected == 0) throw new NotFoundResponse();
             cacher.removeCache(String.valueOf(id));
             cacher.setLastModified("ALL");
             cacher.setLastModified("ME:" + auth.getMe(ctx));
@@ -161,7 +163,8 @@ public class Hdv {
         try (
                 PreparedStatement pstmt = database.prepare("UPDATE offer SET price_in_kamas = ?, quantity = ? WHERE offer_id = ? AND user_id = ?", new Object[]{body.price, body.amount, id, auth.getMe(ctx)})
         ) {
-            pstmt.execute();
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected == 0) throw new NotFoundResponse();
             cacher.setLastModified(String.valueOf(id));
             cacher.setLastModified("ALL");
             cacher.setLastModified("ME:" + auth.getMe(ctx));
@@ -195,7 +198,8 @@ public class Hdv {
             try (
                     PreparedStatement pstmt = database.prepare(query.toString(), params.toArray())
             ) {
-                pstmt.execute();
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected == 0) throw new NotFoundResponse();
                 cacher.setLastModified(String.valueOf(id));
                 cacher.setLastModified("ALL");
                 cacher.setLastModified("ME:" + auth.getMe(ctx));

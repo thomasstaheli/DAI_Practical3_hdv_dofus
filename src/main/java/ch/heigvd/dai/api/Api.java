@@ -11,6 +11,8 @@ import io.javalin.http.InternalServerErrorResponse;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 public class Api {
     private final Javalin app;
@@ -19,7 +21,9 @@ public class Api {
     private final Hdv hdv;
 
     public Api(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
-        this.app = Javalin.create();
+        this.app = Javalin.create(config -> {
+            config.validation.register(LocalDateTime.class, LocalDateTime::parse);
+        });
         Cacher cacher = new Cacher();
         this.auth = new Auth(database, cacher);
         this.user = new User(database, auth, cacher);
@@ -27,7 +31,8 @@ public class Api {
     }
 
     public void start(int port) {
-        app.exception(Exception.class, (e, ctx) -> {
+        app.exception(SQLException.class, (e, ctx) -> {
+            System.out.println(e.getMessage());
             throw new InternalServerErrorResponse();
         });
 
@@ -47,7 +52,6 @@ public class Api {
         app.patch("/users/me", user::updateMe);
         app.delete("/users/me", user::removeMe);
         app.get("/users/{id}", user::getOne);
-
 
         // Hdv
         app.get("/hdv", hdv::getAll);
