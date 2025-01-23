@@ -112,8 +112,16 @@ public class Hdv {
         }
     }
 
-    public void create(Context ctx) {
+    public void create(Context ctx) throws SQLException {
         OfferBody body = OfferBody.full(ctx);
+        try (
+                PreparedStatement pstmt = database.prepare("SELECT 1 FROM inventory_user WHERE user_id = ? AND item_id = ? AND quantity >= ?", new Object[]{auth.getMe(ctx), body.itemId, body.amount});
+                ResultSet result = pstmt.executeQuery()
+        ) {
+            if (!result.next()) throw new UnauthorizedResponse();
+        }
+
+
         try (PreparedStatement pstmt = database.prepare("INSERT INTO offer(item_id, user_id, price_in_kamas, quantity) VALUES (?, ?, ?, ?)", new Object[]{body.itemId, auth.getMe(ctx), body.price, body.amount})) {
             pstmt.execute();
             ctx.status(201).json(Status.ok());
@@ -122,9 +130,25 @@ public class Hdv {
         }
     }
 
-    public void update(Context ctx) {
+    public void update(Context ctx) throws SQLException {
         int id = Integer.parseInt(ctx.pathParam("id"));
         OfferUpdateBody body = OfferUpdateBody.full(ctx);
+
+        try (
+                PreparedStatement pstmt = database.prepare("SELECT * FROM offer WHERE user_id = ? AND offer_id = ?", new Object[]{auth.getMe(ctx), id});
+                ResultSet result = pstmt.executeQuery()
+        ) {
+            if (!result.next()) throw new UnauthorizedResponse();
+            OfferEntry offerEntry = OfferEntry.get(result);
+            if (body.amount > offerEntry.amount) {
+                try (
+                        PreparedStatement pstmt2 = database.prepare("SELECT 1 from inventory_user WHERE user_id = ? AND item_id = ? AND quantity >= ?", new Object[]{auth.getMe(ctx), offerEntry.itemId, body.amount - offerEntry.amount});
+                        ResultSet result2 = pstmt2.executeQuery()
+                ) {
+                    if (!result2.next()) throw new UnauthorizedResponse();
+                }
+            }
+        }
 
         try (
                 PreparedStatement pstmt = database.prepare("UPDATE offer SET price_in_kamas = ?, quantity = ? WHERE offer_id = ? AND user_id = ?", new Object[]{body.price, body.amount, id, auth.getMe(ctx)})
@@ -136,7 +160,7 @@ public class Hdv {
         }
     }
 
-    public void partialUpdate(Context ctx) {
+    public void partialUpdate(Context ctx) throws SQLException {
         int id = Integer.parseInt(ctx.pathParam("id"));
         OfferUpdateBody body = OfferUpdateBody.partial(ctx);
 
@@ -144,6 +168,22 @@ public class Hdv {
         List<Object> params = new ArrayList<>();
 
         if (body.amount != null) {
+            try (
+                    PreparedStatement pstmt = database.prepare("SELECT * FROM offer WHERE user_id = ? AND offer_id = ?", new Object[]{auth.getMe(ctx), id});
+                    ResultSet result = pstmt.executeQuery()
+            ) {
+                if (!result.next()) throw new UnauthorizedResponse();
+                OfferEntry offerEntry = OfferEntry.get(result);
+                if (body.amount > offerEntry.amount) {
+                    try (
+                            PreparedStatement pstmt2 = database.prepare("SELECT 1 from inventory_user WHERE user_id = ? AND item_id = ? AND quantity >= ?", new Object[]{auth.getMe(ctx), offerEntry.itemId, body.amount - offerEntry.amount});
+                            ResultSet result2 = pstmt2.executeQuery()
+                    ) {
+                        if (!result2.next()) throw new UnauthorizedResponse();
+                    }
+                }
+            }
+
             query.append("amount = ?, ");
             params.add(body.amount);
         }

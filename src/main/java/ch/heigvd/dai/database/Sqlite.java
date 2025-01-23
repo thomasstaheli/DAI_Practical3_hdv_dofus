@@ -26,7 +26,7 @@ public class Sqlite implements AutoCloseable {
   }
 
   public void init() throws SQLException, IOException {
-    executeSql("./scripts/init.sql");
+      executeSql("./scripts/init.sql");
   }
 
   public void seed() throws SQLException, IOException {
