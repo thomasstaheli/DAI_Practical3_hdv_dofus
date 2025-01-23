@@ -11,6 +11,7 @@ import io.javalin.http.InternalServerErrorResponse;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.sql.SQLException;
 
 public class Api {
     private final Javalin app;
@@ -28,7 +29,8 @@ public class Api {
     }
 
     public void start(int port) {
-        app.exception(Exception.class, (e, ctx) -> {
+        app.exception(SQLException.class, (e, ctx) -> {
+            System.out.println(e.getMessage());
             throw new InternalServerErrorResponse();
         });
 
