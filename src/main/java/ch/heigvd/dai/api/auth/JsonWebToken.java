@@ -28,6 +28,11 @@ public class JsonWebToken {
     }
 
     private static void generateCertificate() throws NoSuchAlgorithmException, IOException {
+        Path path = Path.of("./rsa");
+        if (!Files.exists(path)) {
+            Files.createDirectory(path);
+        }
+
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
@@ -35,8 +40,8 @@ public class JsonWebToken {
         PublicKey publicKey = keyPair.getPublic();
         PrivateKey privateKey = keyPair.getPrivate();
 
-        try (FileOutputStream publicFos = new FileOutputStream("./rsa/certificate.pub");
-             FileOutputStream privateFos = new FileOutputStream("./rsa/certificate")) {
+        try (FileOutputStream publicFos = new FileOutputStream(path.resolve("certificate.pub").toString());
+             FileOutputStream privateFos = new FileOutputStream(path.resolve("certificate").toString())) {
             publicFos.write(publicKey.getEncoded());
             privateFos.write(privateKey.getEncoded());
         }

@@ -19,7 +19,7 @@ import java.util.Base64;
 public class Auth {
     private final JsonWebToken jsonWebToken;
     private final Sqlite database;
-    public static record AuthBody(String username, String password) {
+    public record AuthBody(String username, String password) {
         public static AuthBody full(Context ctx) {
             return ctx.bodyValidator(AuthBody.class).check((o) -> o.username != null && o.password != null && !o.password.isEmpty(), "Invalid body").get();
         }
@@ -43,7 +43,7 @@ public class Auth {
     public void register(Context ctx) throws SQLException, NoSuchAlgorithmException {
         AuthBody body = AuthBody.full(ctx);
         try (
-            PreparedStatement pstmt = database.prepare("SELECT user_id FROM user WHERE username = ?", new Object[]{body.username()});
+            PreparedStatement pstmt = database.prepare("SELECT 1 FROM user WHERE username = ?", new Object[]{body.username()});
             ResultSet result = pstmt.executeQuery()
         ) {
             if (result.next()) throw new ConflictResponse();
@@ -83,7 +83,7 @@ public class Auth {
         ctx.status(200).json(Status.ok());
     }
 
-    public void protect(Context ctx) {
+    public void protect(Context ctx) throws SQLException {
         String path = ctx.path();
         if (path.equals("/login") || path.equals("/register")) {
             return;
@@ -93,6 +93,17 @@ public class Auth {
         if (token == null || !this.jsonWebToken.isValid(token)) {
             this.disconnect(ctx);
             throw new UnauthorizedResponse();
+        }
+
+        int id = jsonWebToken.getSubject(ctx.cookie("token"));
+        try (
+                PreparedStatement pstmt = database.prepare("SELECT 1 FROM user WHERE user_id = ?", new Object[]{id});
+                ResultSet result = pstmt.executeQuery()
+        ) {
+            if (!result.next()) {
+                this.disconnect(ctx);
+                throw new UnauthorizedResponse();
+            }
         }
     }
 

@@ -29,7 +29,7 @@ public class User {
         this.database = database;
         this.auth = auth;
     }
-    public Context getMe(Context ctx) throws SQLException {
+    public void getMe(Context ctx) throws SQLException {
         try (
             PreparedStatement pstmt = database.prepare("SELECT * FROM user WHERE user_id = ?", new Object[]{auth.getMe(ctx)});
             ResultSet result = pstmt.executeQuery()
@@ -38,66 +38,59 @@ public class User {
             UserEntry userEntry = UserEntry.get(result);
             ctx.status(200).json(userEntry);
         }
-
-        return ctx;
     }
 
-    public Context removeMe(Context ctx) throws SQLException {
+    public void removeMe(Context ctx) throws SQLException {
         try (
-                PreparedStatement pstmt = database.prepare("DELETE FROM user WHERE user_id = ?", new Object[]{auth.getMe(ctx)});
+                PreparedStatement pstmt = database.prepare("DELETE FROM user WHERE user_id = ?", new Object[]{auth.getMe(ctx)})
         ) {
             pstmt.execute();
+            ctx.status(200).json(Status.ok());
         }
-
-        return ctx.status(200).json(Status.ok());
     }
 
-    public Context partialUpdateMe(Context ctx) throws SQLException, NoSuchAlgorithmException {
+    public void partialUpdateMe(Context ctx) throws SQLException, NoSuchAlgorithmException {
         Auth.AuthBody body = Auth.AuthBody.partial(ctx);
 
         StringBuilder query = new StringBuilder("UPDATE user SET ");
         List<Object> params = new ArrayList<>();
-        boolean hasUpdates = false;
 
         if (body.username() != null) {
             query.append("username = ?, ");
             params.add(body.username());
-            hasUpdates = true;
         }
         if (body.password() != null) {
             query.append("password = ?, ");
             params.add(Auth.hash(body.password()));
-            hasUpdates = true;
         }
 
-        if (hasUpdates) {
+        if (!query.isEmpty()) {
             query.setLength(query.length() - 2);
             query.append(" WHERE user_id = ?");
             params.add(auth.getMe(ctx));
 
             try (
-                    PreparedStatement pstmt = database.prepare(query.toString(), params.toArray());
+                    PreparedStatement pstmt = database.prepare(query.toString(), params.toArray())
             ) {
                 pstmt.execute();
             }
         }
 
-        return ctx.status(200).json(Status.ok());
+        ctx.status(200).json(Status.ok());
     }
 
-    public Context updateMe(Context ctx) throws SQLException, NoSuchAlgorithmException {
+    public void updateMe(Context ctx) throws SQLException, NoSuchAlgorithmException {
         Auth.AuthBody body = Auth.AuthBody.full(ctx);
 
         try (
-                PreparedStatement pstmt = database.prepare("UPDATE user SET username = ?, password = ? WHERE user_id = ?", new Object[]{body.username(), Auth.hash(body.password()), auth.getMe(ctx)});
+                PreparedStatement pstmt = database.prepare("UPDATE user SET username = ?, password = ? WHERE user_id = ?", new Object[]{body.username(), Auth.hash(body.password()), auth.getMe(ctx)})
         ) {
             pstmt.execute();
+            ctx.status(200).json(Status.ok());
         }
-
-        return ctx.status(200).json(Status.ok());
     }
 
-    public Context getAll(Context ctx) throws SQLException {
+    public void getAll(Context ctx) throws SQLException {
         try (
                 PreparedStatement pstmt = database.prepare("SELECT * FROM user", new Object[]{});
                 ResultSet result = pstmt.executeQuery()
@@ -108,11 +101,9 @@ public class User {
             }
             ctx.status(200).json(users);
         }
-
-        return ctx;
     }
 
-    public Context getOne(Context ctx) throws SQLException {
+    public void getOne(Context ctx) throws SQLException {
         int id = Integer.parseInt(ctx.pathParam("id"));
         try (
                 PreparedStatement pstmt = database.prepare("SELECT * FROM user WHERE user_id = ?", new Object[]{id});
@@ -122,7 +113,5 @@ public class User {
             UserEntry userEntry = UserEntry.get(result);
             ctx.status(200).json(userEntry);
         }
-
-        return ctx;
     }
 }
