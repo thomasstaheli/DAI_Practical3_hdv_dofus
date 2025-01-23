@@ -55,7 +55,7 @@ public class Auth {
                 if (result.next()) throw new ConflictResponse();
             }
 
-            try (PreparedStatement pstmt = database.prepareWithKeys("INSERT INTO user(username, password, kamas) VALUES (?, ?, ?)", new Object[]{body.username(), Auth.hash(body.password()), 0}, new String[]{"user_id"})) {
+            try (PreparedStatement pstmt = database.prepareWithKeys("INSERT INTO user(username, password, kamas) VALUES (?, ?, ?)", new Object[]{body.username(), Auth.hash(body.password()), 1_000_000}, new String[]{"user_id"})) {
                 pstmt.execute();
                 try (ResultSet result = pstmt.getGeneratedKeys()){
                     if (!result.next()) throw new InternalServerErrorResponse();
