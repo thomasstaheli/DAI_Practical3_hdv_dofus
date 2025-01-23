@@ -5,6 +5,8 @@ import ch.heigvd.dai.api.auth.Auth;
 import ch.heigvd.dai.caching.Cacher;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.http.Context;
+import io.javalin.http.InternalServerErrorResponse;
+import io.javalin.http.NotFoundResponse;
 import io.javalin.http.UnauthorizedResponse;
 
 import java.sql.PreparedStatement;
@@ -84,7 +86,7 @@ public class Hdv {
                 PreparedStatement pstmt = database.prepare("SELECT * FROM offer WHERE offer_id = ?", new Object[]{id});
                 ResultSet result = pstmt.executeQuery()
         ) {
-            if (!result.next()) throw new UnauthorizedResponse();
+            if (!result.next()) throw new NotFoundResponse();
             OfferEntry offerEntry = OfferEntry.get(result);
             try (
                     PreparedStatement pstmt2 = database.prepare("SELECT 1 from user WHERE user_id = ? AND kamas >= ?", new Object[]{auth.getMe(ctx), offerEntry.price});
@@ -101,7 +103,7 @@ public class Hdv {
             cacher.removeCache(String.valueOf(id));
             cacher.setLastModified("ALL");
             try (ResultSet result = pstmt.getResultSet()) {
-                result.next();
+                if (!result.next()) throw new InternalServerErrorResponse();
                 cacher.setLastModified("ME:" + result.getInt("user_id"));
             }
             ctx.status(200).json(Status.ok());
@@ -141,7 +143,7 @@ public class Hdv {
         try (PreparedStatement pstmt = database.prepareWithKeys("INSERT INTO offer(item_id, user_id, price_in_kamas, quantity) VALUES (?, ?, ?, ?)", new Object[]{body.itemId, auth.getMe(ctx), body.price, body.amount}, new String[]{"offer_id"})) {
             pstmt.execute();
             try (ResultSet result = pstmt.getGeneratedKeys()) {
-                result.next();
+                if (!result.next()) throw new InternalServerErrorResponse();
                 cacher.setLastModified(String.valueOf(result.getInt(1)));
                 cacher.setLastModified("ALL");
                 cacher.setLastModified("ME:" + auth.getMe(ctx));
@@ -208,7 +210,7 @@ public class Hdv {
                 PreparedStatement pstmt = database.prepare("SELECT * FROM offer WHERE user_id = ? AND offer_id = ?", new Object[]{auth.getMe(ctx), id});
                 ResultSet result = pstmt.executeQuery()
         ) {
-            if (!result.next()) throw new UnauthorizedResponse();
+            if (!result.next()) throw new NotFoundResponse();
             OfferEntry offerEntry = OfferEntry.get(result);
             if (body.amount > offerEntry.amount) {
                 try (

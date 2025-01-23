@@ -33,7 +33,7 @@ public class Api {
 
         app.before(auth::protect);
 
-        app.get("/ping", ctx -> ctx.result("pong"));
+        app.get("/ping", ctx -> ctx.json(Status.ok()));
 
         // Authentication
         app.post("/register", auth::register);

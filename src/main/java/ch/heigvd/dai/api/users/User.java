@@ -5,6 +5,8 @@ import ch.heigvd.dai.api.auth.Auth;
 import ch.heigvd.dai.caching.Cacher;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.http.Context;
+import io.javalin.http.InternalServerErrorResponse;
+import io.javalin.http.NotFoundResponse;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.PreparedStatement;
@@ -38,8 +40,8 @@ public class User {
       try (
             PreparedStatement pstmt = database.prepare("SELECT * FROM user WHERE user_id = ?", new Object[]{auth.getMe(ctx)});
             ResultSet result = pstmt.executeQuery()
-        ) {
-            result.next();
+      ) {
+            if (!result.next()) throw new InternalServerErrorResponse();
             UserEntry userEntry = UserEntry.get(result);
             cacher.setCacheHeader(String.valueOf(auth.getMe(ctx)), ctx);
             ctx.status(200).json(userEntry);
@@ -120,11 +122,12 @@ public class User {
     public void getOne(Context ctx) throws SQLException {
         int id = Integer.parseInt(ctx.pathParam("id"));
         cacher.checkCache(String.valueOf(id), ctx);
+
         try (
                 PreparedStatement pstmt = database.prepare("SELECT * FROM user WHERE user_id = ?", new Object[]{id});
                 ResultSet result = pstmt.executeQuery()
         ) {
-            result.next();
+            if (!result.next()) throw new NotFoundResponse();
             UserEntry userEntry = UserEntry.get(result);
             cacher.setCacheHeader(String.valueOf(id), ctx);
             ctx.status(200).json(userEntry);

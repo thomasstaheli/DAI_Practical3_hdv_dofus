@@ -6,6 +6,7 @@ import ch.heigvd.dai.database.Sqlite;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import io.javalin.http.ConflictResponse;
 import io.javalin.http.Context;
+import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.UnauthorizedResponse;
 
 import java.io.IOException;
@@ -44,28 +45,26 @@ public class Auth {
         this.cacher = cacher;
     }
 
-    public void register(Context ctx) throws SQLException, NoSuchAlgorithmException {
+    public void register(Context ctx) throws SQLException {
         AuthBody body = AuthBody.full(ctx);
-        try (
-            PreparedStatement pstmt = database.prepare("SELECT 1 FROM user WHERE username = ?", new Object[]{body.username()});
-            ResultSet result = pstmt.executeQuery()
-        ) {
-            if (result.next()) throw new ConflictResponse();
-        } catch (SQLException e) {
-            this.disconnect(ctx);
-            throw e;
-        }
-
-        try (PreparedStatement pstmt = database.prepareWithKeys("INSERT INTO user(username, password, kamas) VALUES (?, ?, ?)", new Object[]{body.username(), Auth.hash(body.password()), 0}, new String[]{"user_id"})) {
-            pstmt.execute();
-            try (ResultSet result = pstmt.getGeneratedKeys()){
-                result.next();
-                cacher.setLastModified(String.valueOf(result.getInt(1)));
-                cacher.setLastModified("ALL");
-                ctx.status(201).json(Status.ok());
+        try {
+            try (
+                    PreparedStatement pstmt = database.prepare("SELECT 1 FROM user WHERE username = ?", new Object[]{body.username()});
+                    ResultSet result = pstmt.executeQuery()
+            ) {
+                if (result.next()) throw new ConflictResponse();
             }
 
-        } catch (SQLException | NoSuchAlgorithmException e) {
+            try (PreparedStatement pstmt = database.prepareWithKeys("INSERT INTO user(username, password, kamas) VALUES (?, ?, ?)", new Object[]{body.username(), Auth.hash(body.password()), 0}, new String[]{"user_id"})) {
+                pstmt.execute();
+                try (ResultSet result = pstmt.getGeneratedKeys()){
+                    if (!result.next()) throw new InternalServerErrorResponse();
+                    cacher.setLastModified(String.valueOf(result.getInt(1)));
+                    cacher.setLastModified("ALL");
+                    ctx.status(201).json(Status.ok());
+                }
+            }
+        } catch (Exception e) {
             this.disconnect(ctx);
             throw e;
         }
@@ -81,7 +80,7 @@ public class Auth {
             int id = result.getInt("user_id");
             ctx.cookie("token", jsonWebToken.generate(id));
             ctx.status(200).json(Status.ok());
-        } catch (SQLException | NoSuchAlgorithmException e) {
+        } catch (Exception e) {
             this.disconnect(ctx);
             throw e;
         }
