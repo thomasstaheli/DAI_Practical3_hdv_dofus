@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="ch.heigvd.dai.Main" />
-    <module name="21-http-and-curl" />
+    <module name="DAI_Practical3_hdv_dofus" />
     <option name="PROGRAM_PARAMETERS" value="--init --seed" />
     <target name="@@@LOCAL@@@" />
     <extension name="coverage">
