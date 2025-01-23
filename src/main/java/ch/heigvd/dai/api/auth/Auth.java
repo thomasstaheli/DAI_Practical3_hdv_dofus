@@ -45,7 +45,7 @@ public class Auth {
         this.cacher = cacher;
     }
 
-    public void register(Context ctx) throws SQLException {
+    public void register(Context ctx) throws SQLException, NoSuchAlgorithmException {
         AuthBody body = AuthBody.full(ctx);
         try {
             try (
@@ -64,7 +64,7 @@ public class Auth {
                     ctx.status(201).json(Status.ok());
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException | NoSuchAlgorithmException e) {
             this.disconnect(ctx);
             throw e;
         }
