@@ -41,4 +41,3 @@ build/
 *.db
 
 rsa/*
-!rsa/.gitkeep
