@@ -19,3 +19,13 @@ INSERT INTO item (nom, description) VALUES
 ('Eau de Vie', 'Une boisson rare qui régénère instantanément la santé de l utilisateur.'),
 ('Hache du Bois', 'Une hache ordinaire utilisée pour couper du bois et fabriquer des objets.'),
 ('Gant de Cuir', 'Un gant de cuir souple qui protège les mains tout en maintenant une grande agilité.');
+
+INSERT INTO inventory_user (user_id, item_id, quantity) VALUES
+(1, 1, 10),
+(1, 2, 12),
+(1, 3, 14),
+(1, 4, 16),
+(2, 5, 10),
+(2, 6, 12),
+(2, 7, 14),
+(2, 8, 16);

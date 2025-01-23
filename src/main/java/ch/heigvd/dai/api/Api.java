@@ -1,6 +1,7 @@
 package ch.heigvd.dai.api;
 
 import ch.heigvd.dai.api.auth.Auth;
+import ch.heigvd.dai.api.users.Inventory;
 import ch.heigvd.dai.api.hdv.Hdv;
 import ch.heigvd.dai.api.users.User;
 import ch.heigvd.dai.database.Sqlite;
@@ -15,12 +16,14 @@ public class Api {
     private final Javalin app;
     private final Auth auth;
     private final User user;
+    private Inventory inventoryController;
     private final Hdv hdv;
 
     public Api(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         this.app = Javalin.create();
         this.auth = new Auth(database);
         this.user = new User(database, auth);
+        this.inventoryController = new Inventory(database, auth);
         this.hdv = new Hdv(database, auth);
     }
 
@@ -46,6 +49,12 @@ public class Api {
         app.delete("/users/me", user::removeMe);
         app.get("/users/{id}", user::getOne);
 
+        // Partie inventaire
+        app.get("/myinventory", inventoryController::getInventory);
+        app.post("/myinventory", inventoryController::insertItem);
+        app.delete("/myinventory/{item_id}", inventoryController::deleteItem);
+        app.patch("/myinventory/{item_id}", inventoryController::updateItem);
+        app.put("/myinventory/{item_id}", inventoryController::updateItem);
 
         // Hdv
         app.get("/hdv", hdv::getAll);
