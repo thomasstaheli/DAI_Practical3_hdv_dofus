@@ -1,32 +1,47 @@
 package ch.heigvd.dai.api;
 
+import ch.heigvd.dai.api.auth.Auth;
 import ch.heigvd.dai.api.users.Inventory;
 import ch.heigvd.dai.api.users.User;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.Javalin;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 public class Api {
     private final Javalin app;
     private final Sqlite database;
+    private final Auth auth;
+    private final User user;
     private Inventory inventoryController;
 
-    public Api(Sqlite database) {
+    public Api(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         this.app = Javalin.create();
         this.database = database;
+        this.auth = new Auth(database);
+        this.user = new User(database, auth);
         this.inventoryController = new Inventory(database);
     }
 
     public void start(int port) {
+        app.before(auth::protect);
+
         app.get("/ping", ctx -> ctx.result("pong"));
-        // Partie user
-        app.get("/user", ctx -> ctx.result("list of user"));
 
-        app.get("/user/me", User::getMe);
+        // Authentication
+        app.post("/register", auth::register);
+        app.post("/login", auth::login);
+        app.get("/disconnect", auth::disconnect);
 
-        // A enlever peut être (get un user (nom, prenom, ...))
-        app.get("/user/{user_id}", ctx -> ctx.result("list of user items"));
-        app.patch("/user/me", ctx -> ctx.result("Update one or more param of my user"));
-        app.delete("/user/me", ctx -> ctx.result("To delete my account"));
+        // Users
+        app.get("/users", user::getAll);
+        app.get("/users/me", user::getMe);
+        app.put("/users/me", user::partialUpdateMe);
+        app.patch("/users/me", user::updateMe);
+        app.delete("/users/me", user::removeMe);
+        app.get("/users/{id}", user::getOne);
 
         app.get("/myinvetory/{user_id}", inventoryController::getInventory);
 

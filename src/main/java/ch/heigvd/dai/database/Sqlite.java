@@ -13,10 +13,6 @@ public class Sqlite implements AutoCloseable {
 
   public Sqlite() throws SQLException  {
     try {
-      // TODO only if --init
-      File file = new File("./dofus_hdv.db");
-      if (file.exists()) file.delete();
-
       conn = DriverManager.getConnection("jdbc:sqlite:dofus_hdv.db");
       stmt = conn.createStatement();
     } catch (SQLException e) {
@@ -35,24 +31,34 @@ public class Sqlite implements AutoCloseable {
   }
 
   public void seed() throws SQLException, IOException {
-    executeSql("./scripts/seed.sql");
+      executeSql("./scripts/seed.sql");
   }
 
 
   private void executeSql(String sqlFilePath) throws IOException, SQLException {
-    BufferedReader br = new BufferedReader(new FileReader(sqlFilePath));
+    try (BufferedReader br = new BufferedReader(new FileReader(sqlFilePath))) {
+      StringBuilder query = new StringBuilder();
+      String line;
+      boolean insideBlock = false;
 
-    StringBuilder query = new StringBuilder();
-    String line;
+      while ((line = br.readLine()) != null) {
+        line = line.trim();
+        if (line.startsWith("--") || line.isEmpty()) continue;
 
-    while((line = br.readLine()) != null) {
-      if (line.trim().startsWith("--")) continue;
+        if (line.startsWith("BEGIN")) {
+          insideBlock = true;
+        }
 
-      query.append(line).append(" ");
+        query.append(line).append(" ");
 
-      if(line.trim().endsWith(";")) {
-        stmt.execute(query.toString().trim());
-        query = new StringBuilder();
+        if (insideBlock && line.endsWith("END;")) {
+          insideBlock = false;
+        }
+
+        if (!insideBlock && line.endsWith(";")) {
+          stmt.execute(query.toString());
+          query = new StringBuilder();
+        }
       }
     }
   }
