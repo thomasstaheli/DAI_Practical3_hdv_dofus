@@ -69,7 +69,7 @@ public class Api {
         app.delete("/hdv/{id}", hdv::remove);
         app.post("/hdv", hdv::create);
         app.patch("/hdv/{id}", hdv::update);
-        app.put("/hdv/{id}", hdv::partialUpdate);
+        app.put("/hdv/{id}", hdv::update);
 
         app.start(port);
     }
