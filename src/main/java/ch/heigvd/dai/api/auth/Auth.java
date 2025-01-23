@@ -80,7 +80,7 @@ public class Auth {
             int id = result.getInt("user_id");
             ctx.cookie("token", jsonWebToken.generate(id));
             ctx.status(200).json(Status.ok());
-        } catch (Exception e) {
+        } catch (SQLException | NoSuchAlgorithmException e) {
             this.disconnect(ctx);
             throw e;
         }
