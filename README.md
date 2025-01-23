@@ -28,8 +28,14 @@ cd DAI_Practical3_hdv_dofus
 ```
 
 ### Building the Project
-Use Maven to build the application:
+Define `.env`
+```bash
+cp .env.example .env
+```
 
+Edit `.env`
+
+Use Maven to build the application:
 ```bash
 mvn clean package
 ```
@@ -717,7 +723,7 @@ docker compose up
 #### 1. Compile the Project:
 ```bash
 chmod +x ./mvnw
-./mvnw spotless:apply spotless:check dependency:go-offline clean compile package
+./mvnw dependency:go-offline clean compile package
 ```
 
 #### 2. Create a Docker Image
