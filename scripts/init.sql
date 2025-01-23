@@ -60,6 +60,17 @@ BEGIN
     WHERE user_id = NEW.user_id AND item_id = NEW.item_id AND quantity = 0;
 END;
 
+DROP TRIGGER IF EXISTS remove_offer;
+CREATE TRIGGER remove_offer
+    AFTER DELETE ON offer
+    FOR EACH ROW
+BEGIN
+    INSERT INTO inventory_user(quantity, item_id)
+    values(OLD.quantity, OLD.item_id)
+    ON CONFLICT(user_id, item_id) DO UPDATE
+        SET quantity = quantity + OLD.quantity;
+END;
+
 DROP TRIGGER IF EXISTS update_offer;
 CREATE TRIGGER update_offer
     AFTER UPDATE OF quantity ON offer

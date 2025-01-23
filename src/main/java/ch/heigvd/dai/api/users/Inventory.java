@@ -2,6 +2,7 @@ package ch.heigvd.dai.api.users;
 
 import ch.heigvd.dai.api.Status;
 import ch.heigvd.dai.api.auth.Auth;
+import ch.heigvd.dai.caching.Cacher;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.http.ConflictResponse;
 import io.javalin.http.Context;
@@ -17,6 +18,7 @@ public class Inventory {
 
   private final Sqlite database;
   private final Auth auth;
+  private final Cacher cacher;
 
   private record InventoryUser(Integer id, String nom, Integer quantity) {
     public static InventoryUser get(ResultSet resultSet) throws SQLException {
@@ -40,12 +42,14 @@ public class Inventory {
     }
   }
 
-  public Inventory(Sqlite database, Auth auth) {
+  public Inventory(Sqlite database, Auth auth, Cacher cacher) {
     this.database = database;
     this.auth = auth;
+    this.cacher = cacher;
   }
 
-  public Context getInventory(Context ctx) {
+  public void getInventory(Context ctx) throws SQLException {
+    cacher.checkCache(String.valueOf(auth.getMe(ctx)), ctx);
 
     try (PreparedStatement preparedStatement = database.prepare(
       "SELECT inventory_user.item_id, item.nom, inventory_user.quantity " +
@@ -67,13 +71,9 @@ public class Inventory {
         throw new NotFoundResponse("No item found in inventory");
       }
 
+      cacher.setCacheHeader(String.valueOf(auth.getMe(ctx)), ctx);
       ctx.status(200).json(inventoryFromUser);
-
-    } catch (Exception e) {
-      e.printStackTrace();
     }
-
-    return ctx;
   }
 
   public void insertItem(Context ctx) throws SQLException {
@@ -98,7 +98,7 @@ public class Inventory {
       }
 
       preparedStatement.executeUpdate();
-
+      cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
       ctx.status(201).json(Status.ok());
     }
 
@@ -118,6 +118,7 @@ public class Inventory {
         throw new NotFoundResponse("Item does not exist in inventory");
       }
 
+      cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
       ctx.status(200).json(Status.ok());
     }
   }
@@ -137,6 +138,8 @@ public class Inventory {
       if (rowsAffected == 0) {
         throw new NotFoundResponse("Item does not exist in inventory");
       }
+
+      cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
       ctx.status(200).json(Status.ok());
     }
   }

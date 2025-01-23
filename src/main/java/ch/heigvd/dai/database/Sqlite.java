@@ -63,7 +63,11 @@ public class Sqlite implements AutoCloseable {
   }
 
   public PreparedStatement prepare(String query, Object[] args) throws SQLException {
-    PreparedStatement pstmt = conn.prepareStatement(query);
+    return prepareWithKeys(query, args, new String[]{});
+  }
+
+  public PreparedStatement prepareWithKeys(String query, Object[] args, String[] keys) throws SQLException {
+    PreparedStatement pstmt = conn.prepareStatement(query, keys);
     for (int index = 0; index < args.length; index++) {
       if (args[index].getClass() == Integer.class) {
         pstmt.setInt(index + 1, (int) args[index]);
