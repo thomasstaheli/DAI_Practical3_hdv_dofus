@@ -65,8 +65,8 @@ CREATE TRIGGER remove_offer
     AFTER DELETE ON offer
     FOR EACH ROW
 BEGIN
-    INSERT INTO inventory_user(quantity, item_id)
-    values(OLD.quantity, OLD.item_id)
+    INSERT INTO inventory_user(user_id, quantity, item_id)
+    values(OLD.user_id, OLD.quantity, OLD.item_id)
     ON CONFLICT(user_id, item_id) DO UPDATE
         SET quantity = quantity + OLD.quantity;
 END;
