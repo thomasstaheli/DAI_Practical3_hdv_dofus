@@ -39,6 +39,7 @@ CREATE TABLE inventory_user (
     FOREIGN KEY (user_id) REFERENCES user(user_id)
 );
 
+
 DROP TRIGGER IF EXISTS transfer_item_to_hdv;
 CREATE TRIGGER transfer_item_to_hdv
     AFTER INSERT ON offer
