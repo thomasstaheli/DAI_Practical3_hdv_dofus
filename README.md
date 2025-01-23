@@ -684,8 +684,7 @@ sudo reboot
 To configure the DNS zone, add the following entries to your DNS provider:
 
 ```
-A record -> example.com -> <server-ip>
-CNAME record -> www.example.com -> example.com
+ping dofus-hdv.duckdns.org
 ```
 
 ---
