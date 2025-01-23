@@ -96,22 +96,20 @@ public class Hdv {
             ) {
                 if (!result2.next()) throw new UnauthorizedResponse();
             }
+
+            try (
+                    PreparedStatement pstmt2 = database.prepare("UPDATE offer SET buyer_id = ? WHERE offer_id = ?", new Object[]{auth.getMe(ctx), id})
+            ) {
+                int rowsAffected = pstmt2.executeUpdate();
+                if (rowsAffected == 0) throw new NotFoundResponse();
+                cacher.removeCache(String.valueOf(id));
+                cacherInventory.setLastModified(String.valueOf(auth.getMe(ctx)));
+                cacher.setLastModified("ALL");
+                cacher.setLastModified("ME:" + result.getInt("user_id"));
+                ctx.status(200).json(Status.ok());
+            }
         }
 
-        try (
-                PreparedStatement pstmt = database.prepare("UPDATE offer SET buyer_id = ? WHERE offer_id = ?", new Object[]{auth.getMe(ctx), id})
-        ) {
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected == 0) throw new NotFoundResponse();
-            cacher.removeCache(String.valueOf(id));
-            cacherInventory.setLastModified(String.valueOf(auth.getMe(ctx)));
-            cacher.setLastModified("ALL");
-            try (ResultSet result = pstmt.getResultSet()) {
-                if (!result.next()) throw new InternalServerErrorResponse();
-                cacher.setLastModified("ME:" + result.getInt("user_id"));
-            }
-            ctx.status(200).json(Status.ok());
-        }
     }
 
     public void remove(Context ctx) throws SQLException {
