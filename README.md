@@ -705,11 +705,9 @@ git clone https://github.com/thomasstaheli/DAI_Practical3_hdv_dofus.git
 
 ```bash
 cd DAI_Practical3_hdv_dofus
-```
-
-```bash
 docker pull ghcr.io/leonardjouve/dofus-hdv
 ```
+#### Start docker compose
 
 ```bash
 docker compose up
@@ -734,7 +732,7 @@ docker login ghcr.io -u <username>
 
 #### 4. Tag the Image
 ```bash
-docker tag pass-secure ghcr.io/<username>/dofus-hdv:latest
+docker tag dofus-hdv ghcr.io/<username>/dofus-hdv:latest
 ```
 
 #### 5. Push the Image
