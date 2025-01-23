@@ -23,8 +23,8 @@ Ensure you have the following installed on your system:
 To clone the project, run the following command:
 
 ```bash
-git clone <repository-url>
-cd <repository-folder>
+git clone https://github.com/thomasstaheli/DAI_Practical3_hdv_dofus.git
+cd DAI_Practical3_hdv_dofus
 ```
 
 ### Building the Project
@@ -81,73 +81,75 @@ The API supports the following operations:
 
 ## Endpoints
 
-### Authentication
-
-#### Register a new user
+### Register a new user
 
 - **`POST /register`**
 
 Registers a new user.
 
-##### Request
+#### Request
 
 The request body must contain a JSON object with the following properties:
 
 - `username` - The username of the user (string, required)
 - `password` - The password of the user (string, required)
 
-##### Response
+#### Response
 
 The response body contains a status object:
 
 - `status` - A message indicating the operation was successful
 
-##### Status codes
+#### Status codes
 
 - `201` (Created) - The user has been successfully registered
 - `409` (Conflict) - The username is already taken
 
-#### Login a user
+---
+
+### Login a user
 
 - **`POST /login`**
 
 Logs in a user.
 
-##### Request
+#### Request
 
 The request body must contain a JSON object with the following properties:
 
 - `username` - The username of the user (string, required)
 - `password` - The password of the user (string, required)
 
-##### Response
+#### Response
 
 A `token` cookie is set for authentication. The response body contains a status object:
 
 - `status` - A message indicating the operation was successful
 
-##### Status codes
+#### Status codes
 
 - `200` (OK) - The user has been successfully logged in
 - `401` (Unauthorized) - Invalid credentials
 
-#### Disconnect a user
+---
+
+### Disconnect a user
 
 - **`GET /disconnect`**
 
 Logs out the currently authenticated user.
 
-##### Request
+#### Request
 
 No request body is required.
 
-##### Response
+#### Response
 
 The `token` cookie is removed. The response body contains a status object:
 
 - `status` - A message indicating the operation was successful
 
-##### Status codes
+#### Status codes
 
 - `200` (OK) - The user has been successfully logged out
 
@@ -155,17 +157,17 @@ The `token` cookie is removed. The response body contains a status object:
 
 ### Users
 
-#### Get all users
+### Get all users
 
 - **`GET /users`**
 
 Retrieves a list of all users.
 
-##### Request
+#### Request
 
 No request body is required.
 
-##### Response
+#### Response
 
 The response body contains a JSON array of user objects:
 
@@ -173,21 +175,23 @@ The response body contains a JSON array of user objects:
 - `username` - The username of the user
 - `kamas` - The user’s in-game currency balance
 
-##### Status codes
+#### Status codes
 
 - `200` (OK) - Users have been successfully retrieved
 
-#### Get current user
+---
+
+### Get current user
 
 - **`GET /users/me`**
 
 Retrieves the profile of the currently authenticated user.
 
-##### Request
+#### Request
 
 No request body is required.
 
-##### Response
+#### Response
 
 The response body contains a JSON object with the following properties:
 
@@ -195,87 +199,95 @@ The response body contains a JSON object with the following properties:
 - `username` - The username of the user
 - `kamas` - The user’s in-game currency balance
 
-##### Status codes
+#### Status codes
 
 - `200` (OK) - The user has been successfully retrieved
 
-#### Update current user partially
+---
+
+### Update current user partially
 
 - **`PUT /users/me`**
 
 Updates the current user’s profile partially.
 
-##### Request
+#### Request
 
 The request body can contain any combination of the following properties:
 
 - `username` - The new username of the user (string, optional)
 - `password` - The new password of the user (string, optional)
 
-##### Response
+#### Response
 
 The response body contains a status object:
 
 - `status` - A message indicating the operation was successful
 
-##### Status codes
+#### Status codes
 
 - `200` (OK) - The user has been successfully updated
 
-#### Update current user fully
+---
+
+### Update current user fully
 
 - **`PATCH /users/me`**
 
 Updates the current user’s profile fully.
 
-##### Request
+#### Request
 
 The request body must contain the following properties:
 
 - `username` - The new username of the user (string, required)
 - `password` - The new password of the user (string, required)
 
-##### Response
+#### Response
 
 The response body contains a status object:
 
 - `status` - A message indicating the operation was successful
 
-##### Status codes
+#### Status codes
 
 - `200` (OK) - The user has been successfully updated
 
-#### Delete current user
+---
+
+### Delete current user
 
 - **`DELETE /users/me`**
 
 Deletes the profile of the currently authenticated user.
 
-##### Request
+#### Request
 
 No request body is required.
 
-##### Response
+#### Response
 
 The response body contains a status object:
 
 - `status` - A message indicating the operation was successful
 
-##### Status codes
+#### Status codes
 
 - `200` (OK) - The user has been successfully deleted
 
-#### Get a specific user by ID
+---
+
+### Get a specific user by ID
 
 - **`GET /users/{id}`**
 
 Retrieves a specific user by their ID.
 
-##### Request
+#### Request
 
 The request path must include the ID of the user.
 
-##### Response
+#### Response
 
 The response body contains a JSON object with the following properties:
 
@@ -283,7 +295,7 @@ The response body contains a JSON object with the following properties:
 - `username` - The username of the user
 - `kamas` - The user’s in-game currency balance
 
-##### Status codes
+#### Status codes
 
 - `200` (OK) - The user has been successfully retrieved
 - `404` (Not Found) - The user does not exist
@@ -520,26 +532,6 @@ The response body contains a JSON object indicating success.
 Common errors include:
 - **UnauthorizedResponse**: User is not authenticated or lacks the required permissions.
 - **Not Found**: The requested resource (e.g., offer) does not exist.
-
----
-
-### Data Models
-
-#### Offer Entry
-| Field       | Type    | Description                |
-|-------------|---------|----------------------------|
-| `offerId`   | Integer | The ID of the offer.       |
-| `itemId`    | Integer | The ID of the item.        |
-| `userId`    | Integer | The ID of the user.        |
-| `price`     | Integer | Price of the item in kamas.|
-| `amount`    | Integer | Quantity of the item.      |
-
-#### Offer Body
-| Field       | Type    | Description                            |
-|-------------|---------|----------------------------------------|
-| `itemId`    | Integer | The ID of the item.                    |
-| `price`     | Integer | Price of the item in kamas (required). |
-| `amount`    | Integer | Quantity of the item (required).       |
 
 ### Notes
 
