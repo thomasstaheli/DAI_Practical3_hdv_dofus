@@ -53,7 +53,7 @@ public class Api {
         app.get("/myinventory", inventoryController::getInventory);
         app.post("/myinventory", inventoryController::insertItem);
         app.delete("/myinventory/{item_id}", inventoryController::deleteItem);
-        app.patch("/myinventory", inventoryController::partialUpdateItem);
+        app.patch("/myinventory", inventoryController::updateItem);
         app.put("/myinventory", inventoryController::updateItem);
 
         // Partie hdv
