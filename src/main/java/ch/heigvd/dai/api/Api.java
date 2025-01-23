@@ -43,10 +43,8 @@ public class Api {
         app.delete("/users/me", user::removeMe);
         app.get("/users/{id}", user::getOne);
 
-        app.get("/myinvetory/{user_id}", inventoryController::getInventory);
-
-        app.post("/register", ctx -> ctx.result("Création du compte"));
-        app.post("/login", ctx -> ctx.result("Connextion"));
+        // Partie inventaire
+        app.get("/myinventory", inventoryController::getInventory);
 
         // Partie hdv
         // Pour récuérer les offres d'un user avec /hdv?id=41

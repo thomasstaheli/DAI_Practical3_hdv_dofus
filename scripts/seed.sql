@@ -20,16 +20,12 @@ INSERT INTO item (nom, description) VALUES
 ('Hache du Bois', 'Une hache ordinaire utilisée pour couper du bois et fabriquer des objets.'),
 ('Gant de Cuir', 'Un gant de cuir souple qui protège les mains tout en maintenant une grande agilité.');
 
-INSERT INTO user (first_name, last_name, mdp) VALUES
-('Alice', 'Liddell', 'alice123'),
-('Bob', 'Builder', 'bob123');
-
-INSERT INTO invetory_user (user_id, item_id, quantity) VALUES
-(0, 0, 10),
-(0, 1, 10),
-(0, 2, 10),
-(0, 3, 10),
-(1, 0, 10),
+INSERT INTO inventory_user (user_id, item_id, quantity) VALUES
 (1, 1, 10),
-(1, 2, 10),
-(1, 3, 10)
+(1, 2, 12),
+(1, 3, 14),
+(1, 4, 16),
+(2, 5, 10),
+(2, 6, 12),
+(2, 7, 14),
+(2, 8, 16);
