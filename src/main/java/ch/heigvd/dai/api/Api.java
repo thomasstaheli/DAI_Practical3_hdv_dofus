@@ -19,18 +19,17 @@ public class Api {
     private final Javalin app;
     private final Auth auth;
     private final User user;
-    private Inventory inventoryController;
+    private final Inventory inventoryController;
     private final Hdv hdv;
 
     public Api(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
-        this.app = Javalin.create(config -> {
-            config.validation.register(LocalDateTime.class, LocalDateTime::parse);
-        });
-        Cacher cacher = new Cacher();
-        this.auth = new Auth(database, cacher);
-        this.user = new User(database, auth, cacher);
-        this.inventoryController = new Inventory(database, auth);
-        this.hdv = new Hdv(database, auth);
+        this.app = Javalin.create(config -> config.validation.register(LocalDateTime.class, LocalDateTime::parse));
+        Cacher cacherUser = new Cacher();
+        this.auth = new Auth(database, cacherUser);
+        this.user = new User(database, auth, cacherUser);
+        Cacher cacherInventory = new Cacher();
+        this.inventoryController = new Inventory(database, auth, cacherInventory);
+        this.hdv = new Hdv(database, auth, cacherInventory);
     }
 
     public void start(int port) {

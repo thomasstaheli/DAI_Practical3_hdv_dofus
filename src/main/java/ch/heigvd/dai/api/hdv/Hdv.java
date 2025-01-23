@@ -19,6 +19,7 @@ public class Hdv {
     private final Sqlite database;
     private final Auth auth;
     private final Cacher cacher;
+    private final Cacher cacherInventory;
     public record OfferBody(Integer itemId, Integer price, Integer amount) {
         public static OfferBody full(Context ctx) {
             return ctx.bodyValidator(OfferBody.class).check((o) -> o.itemId != null && o.price != null && o.amount != null && o.price > 0 && o.amount > 0, "Invalid body").get();
@@ -44,10 +45,11 @@ public class Hdv {
         }
     }
 
-    public Hdv(Sqlite database, Auth auth) {
+    public Hdv(Sqlite database, Auth auth, Cacher cacherInventory) {
         this.database = database;
         this.auth = auth;
         this.cacher = new Cacher();
+        this.cacherInventory = cacherInventory;
     }
 
     public void getAll(Context ctx) throws SQLException {
@@ -102,6 +104,7 @@ public class Hdv {
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) throw new NotFoundResponse();
             cacher.removeCache(String.valueOf(id));
+            cacherInventory.setLastModified(String.valueOf(auth.getMe(ctx)));
             cacher.setLastModified("ALL");
             try (ResultSet result = pstmt.getResultSet()) {
                 if (!result.next()) throw new InternalServerErrorResponse();
@@ -126,6 +129,7 @@ public class Hdv {
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) throw new NotFoundResponse();
             cacher.removeCache(String.valueOf(id));
+            cacherInventory.setLastModified(String.valueOf(auth.getMe(ctx)));
             cacher.setLastModified("ALL");
             cacher.setLastModified("ME:" + auth.getMe(ctx));
             ctx.status(200).json(Status.ok());
@@ -147,6 +151,7 @@ public class Hdv {
             try (ResultSet result = pstmt.getGeneratedKeys()) {
                 if (!result.next()) throw new InternalServerErrorResponse();
                 cacher.setLastModified(String.valueOf(result.getInt(1)));
+                cacherInventory.setLastModified(String.valueOf(auth.getMe(ctx)));
                 cacher.setLastModified("ALL");
                 cacher.setLastModified("ME:" + auth.getMe(ctx));
             }
@@ -166,6 +171,7 @@ public class Hdv {
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) throw new NotFoundResponse();
             cacher.setLastModified(String.valueOf(id));
+            cacherInventory.setLastModified(String.valueOf(auth.getMe(ctx)));
             cacher.setLastModified("ALL");
             cacher.setLastModified("ME:" + auth.getMe(ctx));
             ctx.status(200).json(Status.ok());
@@ -201,6 +207,7 @@ public class Hdv {
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected == 0) throw new NotFoundResponse();
                 cacher.setLastModified(String.valueOf(id));
+                cacherInventory.setLastModified(String.valueOf(auth.getMe(ctx)));
                 cacher.setLastModified("ALL");
                 cacher.setLastModified("ME:" + auth.getMe(ctx));
             }
