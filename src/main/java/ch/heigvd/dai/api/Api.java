@@ -24,7 +24,6 @@ public class Api {
         this.auth = new Auth(database, cacher);
         this.user = new User(database, auth, cacher);
         this.hdv = new Hdv(database, auth);
-
     }
 
     public void start(int port) {

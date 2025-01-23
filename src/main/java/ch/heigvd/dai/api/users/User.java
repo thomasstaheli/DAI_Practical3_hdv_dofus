@@ -34,14 +34,14 @@ public class User {
         this.cacher = cacher;
     }
     public void getMe(Context ctx) throws SQLException {
-      cacher.handleCache("USER:" + auth.getMe(ctx), ctx);
+      cacher.checkCache(String.valueOf(auth.getMe(ctx)), ctx);
       try (
             PreparedStatement pstmt = database.prepare("SELECT * FROM user WHERE user_id = ?", new Object[]{auth.getMe(ctx)});
             ResultSet result = pstmt.executeQuery()
         ) {
             result.next();
             UserEntry userEntry = UserEntry.get(result);
-            cacher.handleCacheDate("USER:" + auth.getMe(ctx), ctx);
+            cacher.setCacheHeader(String.valueOf(auth.getMe(ctx)), ctx);
             ctx.status(200).json(userEntry);
         }
     }
@@ -51,7 +51,7 @@ public class User {
                 PreparedStatement pstmt = database.prepare("DELETE FROM user WHERE user_id = ?", new Object[]{auth.getMe(ctx)})
         ) {
             pstmt.execute();
-          cacher.destroyCache("USER:" + auth.getMe(ctx));
+            cacher.removeCache(String.valueOf(auth.getMe(ctx)));
             ctx.status(200).json(Status.ok());
         }
     }
@@ -80,7 +80,7 @@ public class User {
                     PreparedStatement pstmt = database.prepare(query.toString(), params.toArray())
             ) {
                 pstmt.execute();
-                cacher.setLastModified("USER:" + auth.getMe(ctx));
+                cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
             }
         }
 
@@ -94,13 +94,13 @@ public class User {
                 PreparedStatement pstmt = database.prepare("UPDATE user SET username = ?, password = ? WHERE user_id = ?", new Object[]{body.username(), Auth.hash(body.password()), auth.getMe(ctx)})
         ) {
           pstmt.execute();
-          cacher.setLastModified("USER:" + auth.getMe(ctx));
+          cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
           ctx.status(200).json(Status.ok());
         }
     }
 
     public void getAll(Context ctx) throws SQLException {
-      cacher.handleCacheAll(ctx);
+      cacher.checkCacheAll(ctx);
       try (
                 PreparedStatement pstmt = database.prepare("SELECT * FROM user", new Object[]{});
                 ResultSet result = pstmt.executeQuery()
@@ -109,21 +109,21 @@ public class User {
             while (result.next()) {
                 users.add(UserEntry.get(result));
             }
-            cacher.handleCacheDateAll(ctx);
+            cacher.setCacheHeaderAll(ctx);
             ctx.status(200).json(users);
         }
     }
 
     public void getOne(Context ctx) throws SQLException {
         int id = Integer.parseInt(ctx.pathParam("id"));
-        cacher.handleCache("USER:" + id, ctx);
+        cacher.checkCache(String.valueOf(id), ctx);
         try (
                 PreparedStatement pstmt = database.prepare("SELECT * FROM user WHERE user_id = ?", new Object[]{id});
                 ResultSet result = pstmt.executeQuery()
         ) {
             result.next();
             UserEntry userEntry = UserEntry.get(result);
-            cacher.handleCacheDate("USER:" + id, ctx);
+            cacher.setCacheHeader(String.valueOf(id), ctx);
             ctx.status(200).json(userEntry);
         }
     }

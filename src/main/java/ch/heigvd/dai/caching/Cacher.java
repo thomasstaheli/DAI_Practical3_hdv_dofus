@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Cacher {
   private final ConcurrentHashMap<String, LocalDateTime> cache = new ConcurrentHashMap<>();
 
-  public void handleCacheDate(String key, Context ctx){
+  public void setCacheHeader(String key, Context ctx) {
     LocalDateTime now;
     if (cache.containsKey(key)) {
       // If it is already in the cache, get the last modification date
@@ -18,21 +18,19 @@ public class Cacher {
       // Otherwise, set to the current date
       now = LocalDateTime.now();
       cache.put(key, now);
-
     }
 
     // Add the last modification date to the response
     ctx.header("Last-Modified", String.valueOf(now));
   }
 
-  public void setLastModified(String key){
+  public void setLastModified(String key) {
     cache.put(key, LocalDateTime.now());
   }
 
-  public void handleCache(String key, Context ctx){
+  public void checkCache(String key, Context ctx) {
     // Get the last known modification date of the user
-    LocalDateTime lastKnownModification =
-            ctx.headerAsClass("If-Modified-Since", LocalDateTime.class).getOrDefault(null);
+    LocalDateTime lastKnownModification = ctx.headerAsClass("If-Modified-Since", LocalDateTime.class).getOrDefault(null);
 
     // Check if the user has been modified since the last known modification date
     if (lastKnownModification != null && cache.get(key).equals(lastKnownModification)) {
@@ -40,16 +38,16 @@ public class Cacher {
     }
   }
 
-  public void handleCacheAll(Context ctx){
+  public void checkCacheAll(Context ctx) {
     LocalDateTime max = null;
     for (LocalDateTime value : cache.values()){
 
       if (max == null || value.isAfter(max))
         max = value;
     }
+
     // Get the last known modification date of the user
-    LocalDateTime lastKnownModification =
-            ctx.headerAsClass("If-Modified-Since", LocalDateTime.class).getOrDefault(null);
+    LocalDateTime lastKnownModification = ctx.headerAsClass("If-Modified-Since", LocalDateTime.class).getOrDefault(null);
 
     // Check if the user has been modified since the last known modification date
     if (max != null && max.equals(lastKnownModification)) {
@@ -57,9 +55,8 @@ public class Cacher {
     }
   }
 
-  public void handleCacheDateAll (Context ctx){
+  public void setCacheHeaderAll(Context ctx){
     LocalDateTime max = null;
-    LocalDateTime now;
     for (LocalDateTime value : cache.values()){
 
       if (max == null || value.isAfter(max))
@@ -72,7 +69,7 @@ public class Cacher {
     ctx.header("Last-Modified", String.valueOf(max));
   }
 
-  public void destroyCache(String key){
+  public void removeCache(String key) {
     cache.remove(key);
   }
 }
