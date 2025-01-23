@@ -61,6 +61,7 @@ public class Auth {
             try (ResultSet result = pstmt.getGeneratedKeys()){
                 result.next();
                 cacher.setLastModified(String.valueOf(result.getInt(1)));
+                cacher.setLastModified("ALL");
                 ctx.status(201).json(Status.ok());
             }
 

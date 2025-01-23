@@ -38,37 +38,6 @@ public class Cacher {
     }
   }
 
-  public void checkCacheAll(Context ctx) {
-    LocalDateTime max = null;
-    for (LocalDateTime value : cache.values()){
-
-      if (max == null || value.isAfter(max))
-        max = value;
-    }
-
-    // Get the last known modification date of the user
-    LocalDateTime lastKnownModification = ctx.headerAsClass("If-Modified-Since", LocalDateTime.class).getOrDefault(null);
-
-    // Check if the user has been modified since the last known modification date
-    if (max != null && max.equals(lastKnownModification)) {
-      throw new NotModifiedResponse();
-    }
-  }
-
-  public void setCacheHeaderAll(Context ctx){
-    LocalDateTime max = null;
-    for (LocalDateTime value : cache.values()){
-
-      if (max == null || value.isAfter(max))
-        max = value;
-    }
-
-    if (max == null)
-      return;
-
-    ctx.header("Last-Modified", String.valueOf(max));
-  }
-
   public void removeCache(String key) {
     cache.remove(key);
   }

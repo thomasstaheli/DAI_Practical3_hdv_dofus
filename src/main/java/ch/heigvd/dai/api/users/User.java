@@ -52,6 +52,7 @@ public class User {
         ) {
             pstmt.execute();
             cacher.removeCache(String.valueOf(auth.getMe(ctx)));
+            cacher.setLastModified("ALL");
             ctx.status(200).json(Status.ok());
         }
     }
@@ -81,6 +82,7 @@ public class User {
             ) {
                 pstmt.execute();
                 cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
+                cacher.setLastModified("ALL");
             }
         }
 
@@ -95,12 +97,13 @@ public class User {
         ) {
           pstmt.execute();
           cacher.setLastModified(String.valueOf(auth.getMe(ctx)));
+          cacher.setLastModified("ALL");
           ctx.status(200).json(Status.ok());
         }
     }
 
     public void getAll(Context ctx) throws SQLException {
-      cacher.checkCacheAll(ctx);
+      cacher.checkCache("ALL", ctx);
       try (
                 PreparedStatement pstmt = database.prepare("SELECT * FROM user", new Object[]{});
                 ResultSet result = pstmt.executeQuery()
@@ -109,7 +112,7 @@ public class User {
             while (result.next()) {
                 users.add(UserEntry.get(result));
             }
-            cacher.setCacheHeaderAll(ctx);
+            cacher.setCacheHeader("ALL", ctx);
             ctx.status(200).json(users);
         }
     }
