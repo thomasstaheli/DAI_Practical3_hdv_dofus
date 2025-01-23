@@ -68,6 +68,13 @@ The web application provides the following endpoints:
 - **PATCH** `/hdv/{id}` - Update an offer
 - **PUT** `/hdv/{id}` - Partially update an offer
 
+### Inventory Management
+- **GET** `/myinventory` - Retrieve the inventory of the current user.
+- **POST** `/myinventory` - Add a new item to the current user's inventory.
+- **DELETE** `/myinventory/{item_id}` - Remove a specific item from the current user's inventory.
+- **PATCH** `/myinventory/{item_id}` - Partially update the quantity or details of a specific item in the inventory.
+- **PUT** `/myinventory/{item_id}` - Fully update the quantity or details of a specific item in the inventory.
+
 ---
 
 ## Using the Web Application
