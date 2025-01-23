@@ -73,8 +73,6 @@ public class Sqlite implements AutoCloseable {
       }
     }
 
-    System.out.println(pstmt.toString());
-
     return pstmt;
   }
 }

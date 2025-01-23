@@ -23,14 +23,10 @@ public class Api {
         this.database = database;
         this.auth = new Auth(database);
         this.user = new User(database, auth);
-        this.inventoryController = new Inventory(database);
+        this.inventoryController = new Inventory(database, auth);
     }
 
     public void start(int port) {
-
-        app.exception(Exception.class, (e, ctx) -> {
-            throw new InternalServerErrorResponse();
-        });
 
         app.before(auth::protect);
 
@@ -53,8 +49,8 @@ public class Api {
         app.get("/myinventory", inventoryController::getInventory);
         app.post("/myinventory", inventoryController::insertItem);
         app.delete("/myinventory/{item_id}", inventoryController::deleteItem);
-        app.patch("/myinventory", inventoryController::updateItem);
-        app.put("/myinventory", inventoryController::updateItem);
+        app.patch("/myinventory/{item_id}", inventoryController::updateItem);
+        app.put("/myinventory/{item_id}", inventoryController::updateItem);
 
         // Partie hdv
         // Pour récuérer les offres d'un user avec /hdv?id=41
