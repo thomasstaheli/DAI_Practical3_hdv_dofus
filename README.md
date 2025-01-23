@@ -699,9 +699,14 @@ git clone https://github.com/thomasstaheli/DAI_Practical3_hdv_dofus.git
 
 4. Run the following command:
 
-### Docker
+### Docker & Compose
 
 #### Pull l'image docker
+
+```bash
+cd DAI_Practical3_hdv_dofus
+```
+
 ```bash
 docker pull ghcr.io/leonardjouve/dofus-hdv
 ```
