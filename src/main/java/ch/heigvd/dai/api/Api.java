@@ -3,6 +3,7 @@ package ch.heigvd.dai.api;
 import ch.heigvd.dai.api.auth.Auth;
 import ch.heigvd.dai.api.hdv.Hdv;
 import ch.heigvd.dai.api.users.User;
+import ch.heigvd.dai.caching.Cacher;
 import ch.heigvd.dai.database.Sqlite;
 import io.javalin.Javalin;
 import io.javalin.http.InternalServerErrorResponse;
@@ -19,9 +20,11 @@ public class Api {
 
     public Api(Sqlite database) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         this.app = Javalin.create();
-        this.auth = new Auth(database);
-        this.user = new User(database, auth);
+        Cacher cacher = new Cacher();
+        this.auth = new Auth(database, cacher);
+        this.user = new User(database, auth, cacher);
         this.hdv = new Hdv(database, auth);
+
     }
 
     public void start(int port) {
