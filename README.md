@@ -776,7 +776,7 @@ docker-compose up --build -d
 Once the application is deployed, access it via:
 
 ```
-http://example.com
+http://dofus-hdv.duckdns.org
 ```
 
 ---
@@ -785,6 +785,10 @@ http://example.com
 To verify domain name configuration, use:
 
 ```bash
-dig example.com +short
+nslookup dofus-hdv.duckdns.org
+
+Réponse ne faisant pas autorité :
+Nom :    dofus-hdv.duckdns.org
+Address:  20.56.21.202
 ```
 
