@@ -3,7 +3,7 @@ CREATE TABLE user (
     user_id INTEGER PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(50) NOT NULL,
-    kamas INT
+    kamas INT NOT NULL
 );
 
 DROP TABLE IF EXISTS item;
