@@ -700,39 +700,14 @@ git clone https://github.com/thomasstaheli/DAI_Practical3_hdv_dofus.git
 4. Run the following command:
 
 ### Docker
+
 #### Pull l'image docker
 ```bash
 docker pull ghcr.io/leonardjouve/dofus-hdv
 ```
 
-#### Launching the Server
 ```bash
-docker run -p <port>:6433 ghcr.io/leonardjouve/pass-secure server --vault <vault> --thread <amount>
-```
-
-#### Lancer le client
-```bash
-docker run -it ghcr.io/leonardjouve/pass-secure client --host <host> --port <port>
-```
-
-#### Exemple d'utilisation en local:
-#### Lancer le serveur
-```bash
-docker run -p 6433:6433 ghcr.io/leonardjouve/pass-secure server
-```
-
-#### Réccupérer son ip locale
-```bash
-ifconfig
-
-eth0:   ...
-        inet 172.25.198.170  ...
-        ...
-```
-
-Lancer le client
-```bash
-docker run -it ghcr.io/leonardjouve/pass-secure client --host 172.25.198.170
+docker compose up
 ```
 
 ### Publishing Your Own Docker Image
