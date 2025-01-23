@@ -25,12 +25,9 @@ public class Hdv {
             return ctx.bodyValidator(OfferBody.class).check((o) -> o.itemId != null && o.price != null && o.amount != null && o.price > 0 && o.amount > 0, "Invalid body").get();
         }
     }
-    public record OfferUpdateBody(Integer price, Integer amount) {
+    public record OfferUpdateBody(Integer price) {
         public static OfferUpdateBody full(Context ctx) {
-            return ctx.bodyValidator(OfferUpdateBody.class).check((o) -> o.price != null && o.amount != null && o.price > 0 && o.amount > 0, "Invalid body").get();
-        }
-        public static OfferUpdateBody partial(Context ctx) {
-            return ctx.bodyValidator(OfferUpdateBody.class).check((o) -> (o.price == null || o.price > 0) && (o.amount == null || o.amount > 0), "Invalid body").get();
+            return ctx.bodyValidator(OfferUpdateBody.class).check((o) -> o.price != null && o.price > 0, "Invalid body").get();
         }
     }
     public record OfferEntry(Integer offerId, Integer itemId, Integer userId, Integer price, Integer amount) {
@@ -143,7 +140,6 @@ public class Hdv {
             if (!result.next()) throw new UnauthorizedResponse();
         }
 
-
         try (PreparedStatement pstmt = database.prepareWithKeys("INSERT INTO offer(item_id, user_id, price_in_kamas, quantity) VALUES (?, ?, ?, ?)", new Object[]{body.itemId, auth.getMe(ctx), body.price, body.amount}, new String[]{"offer_id"})) {
             pstmt.execute();
             try (ResultSet result = pstmt.getGeneratedKeys()) {
@@ -161,10 +157,9 @@ public class Hdv {
         int id = Integer.parseInt(ctx.pathParam("id"));
         OfferUpdateBody body = OfferUpdateBody.full(ctx);
 
-        checkUpdateAmount(ctx, body, id);
-
         try (
-                PreparedStatement pstmt = database.prepare("UPDATE offer SET price_in_kamas = ?, quantity = ? WHERE offer_id = ? AND user_id = ?", new Object[]{body.price, body.amount, id, auth.getMe(ctx)})
+                PreparedStatement pstmt = database.prepare("UPDATE offer SET price_in_kamas = ? WHERE offer_id = ? AND user_id = ?",
+                        new Object[]{body.price, id, auth.getMe(ctx)})
         ) {
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) throw new NotFoundResponse();
@@ -176,59 +171,4 @@ public class Hdv {
         }
     }
 
-    public void partialUpdate(Context ctx) throws SQLException {
-        int id = Integer.parseInt(ctx.pathParam("id"));
-        OfferUpdateBody body = OfferUpdateBody.partial(ctx);
-
-        StringBuilder query = new StringBuilder("UPDATE offer SET ");
-        List<Object> params = new ArrayList<>();
-
-        if (body.amount != null) {
-            checkUpdateAmount(ctx, body, id);
-
-            query.append("amount = ?, ");
-            params.add(body.amount);
-        }
-        if (body.price != null) {
-            query.append("price = ?, ");
-            params.add(body.price);
-        }
-
-        if (!query.isEmpty()) {
-            query.setLength(query.length() - 2);
-            query.append(" WHERE offer_id = ? AND user_id = ?");
-            params.add(id, auth.getMe(ctx));
-
-            try (
-                    PreparedStatement pstmt = database.prepare(query.toString(), params.toArray())
-            ) {
-                int rowsAffected = pstmt.executeUpdate();
-                if (rowsAffected == 0) throw new NotFoundResponse();
-                cacher.setLastModified(String.valueOf(id));
-                cacherInventory.setLastModified(String.valueOf(auth.getMe(ctx)));
-                cacher.setLastModified("ALL");
-                cacher.setLastModified("ME:" + auth.getMe(ctx));
-            }
-        }
-
-        ctx.status(200).json(Status.ok());
-    }
-
-    private void checkUpdateAmount(Context ctx, OfferUpdateBody body, int id) throws SQLException {
-        try (
-                PreparedStatement pstmt = database.prepare("SELECT * FROM offer WHERE user_id = ? AND offer_id = ?", new Object[]{auth.getMe(ctx), id});
-                ResultSet result = pstmt.executeQuery()
-        ) {
-            if (!result.next()) throw new NotFoundResponse();
-            OfferEntry offerEntry = OfferEntry.get(result);
-            if (body.amount > offerEntry.amount) {
-                try (
-                        PreparedStatement pstmt2 = database.prepare("SELECT 1 from inventory_user WHERE user_id = ? AND item_id = ? AND quantity >= ?", new Object[]{auth.getMe(ctx), offerEntry.itemId, body.amount - offerEntry.amount});
-                        ResultSet result2 = pstmt2.executeQuery()
-                ) {
-                    if (!result2.next()) throw new UnauthorizedResponse();
-                }
-            }
-        }
-    }
 }

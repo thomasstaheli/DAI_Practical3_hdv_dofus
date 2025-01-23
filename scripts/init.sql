@@ -71,27 +71,6 @@ BEGIN
         SET quantity = quantity + OLD.quantity;
 END;
 
-DROP TRIGGER IF EXISTS update_offer;
-CREATE TRIGGER update_offer
-    AFTER UPDATE OF quantity ON offer
-    FOR EACH ROW
-BEGIN
-    SELECT
-        RAISE(ABORT, 'Insufficient quantity in inventory_user.')
-    WHERE NOT EXISTS (
-        SELECT 1 FROM inventory_user
-        WHERE user_id = NEW.user_id AND item_id = NEW.item_id AND (OLD.quantity >= NEW.quantity OR quantity >= NEW.quantity - OLD.quantity)
-    );
-
-    INSERT INTO inventory_user(quantity, item_id)
-    values(NEW.quantity - OLD.quantity, NEW.item_id)
-    ON CONFLICT(user_id, item_id) DO UPDATE
-        SET quantity = quantity - (NEW.quantity - OLD.quantity);
-
-    DELETE FROM inventory_user
-    WHERE user_id = NEW.user_id AND item_id = NEW.item_id AND quantity = 0;
-END;
-
 DROP TRIGGER IF EXISTS complete_transaction_on_buyer_update;
 CREATE TRIGGER complete_transaction_on_buyer_update
     AFTER UPDATE OF buyer_id ON offer
