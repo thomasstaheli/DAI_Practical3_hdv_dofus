@@ -4,7 +4,7 @@
 This web application is designed to provide a marketplace for users to trade items securely and efficiently. The application is built using Java, Javalin for the web framework, and SQLite for database management.
 
 **Authors:**  
-- Chef Léonard Jouve
+- Léonard Jouve
 - Ali Zoubir  
 - Thomas Stäheli
 
