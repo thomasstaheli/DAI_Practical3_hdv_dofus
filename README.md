@@ -740,7 +740,7 @@ chmod +x ./mvnw
 
 #### 2. Create a Docker Image
 ```bash
-docker build -t web-application .
+docker build -t dofus-hdv .
 ```
 
 #### 3. Log in to GitHub Container Registry
@@ -750,17 +750,17 @@ docker login ghcr.io -u <username>
 
 #### 4. Tag the Image
 ```bash
-docker tag pass-secure ghcr.io/<username>/pass-secure:latest
+docker tag pass-secure ghcr.io/<username>/dofus-hdv:latest
 ```
 
 #### 5. Push the Image
 ```bash
-docker push ghcr.io/<username>/pass-secure
+docker push ghcr.io/<username>/dofus-hdv
 ```
 
 The created Docker image can then be retrieved using the command:
 ```bash
-docker pull ghcr.io/<username>/pass-secure
+docker pull ghcr.io/<username>/dofus-hdv
 ```
 
 ### Docker compose
