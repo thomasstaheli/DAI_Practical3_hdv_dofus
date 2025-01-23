@@ -13,6 +13,7 @@ public class Sqlite implements AutoCloseable {
 
   public Sqlite() throws SQLException  {
     try {
+      // TODO only if --init
       File file = new File("./dofus_hdv.db");
       if (file.exists()) file.delete();
 
@@ -30,34 +31,15 @@ public class Sqlite implements AutoCloseable {
   }
 
   public void init() throws SQLException, IOException {
-    executeSqlFile("./scripts/init.sql");
+    executeSql("./scripts/init.sql");
   }
 
   public void seed() throws SQLException, IOException {
-      executeSqlFile("./scripts/seed.sql");
+    executeSql("./scripts/seed.sql");
   }
 
-  public ResultSet execute(PreparedStatement userQuery) throws SQLException {
-    return userQuery.executeQuery();
-  }
 
-  public ResultSet execute(String userQuery, Object[] args) throws SQLException {
-
-    PreparedStatement pstmt = conn.prepareStatement(userQuery);
-
-    for(int index = 0; index < args.length; index++) {
-      if(args[index].getClass() == Integer.class) {
-        pstmt.setInt(index, (int) args[index]);
-      } else if(args[index].getClass() == String.class) {
-        pstmt.setString(index, (String) args[index]);
-      }
-      // TODO : Si néecssaire ajouter les méthodes pour insérer dans les requêtes les autres types
-    }
-
-    return pstmt.executeQuery();
-  }
-
-  private void executeSqlFile(String sqlFilePath) throws IOException, SQLException {
+  private void executeSql(String sqlFilePath) throws IOException, SQLException {
     BufferedReader br = new BufferedReader(new FileReader(sqlFilePath));
 
     StringBuilder query = new StringBuilder();
@@ -73,5 +55,18 @@ public class Sqlite implements AutoCloseable {
         query = new StringBuilder();
       }
     }
+  }
+
+  public PreparedStatement prepare(String query, Object[] args) throws SQLException {
+    PreparedStatement pstmt = conn.prepareStatement(query);
+    for (int index = 0; index < args.length; index++) {
+      if (args[index].getClass() == Integer.class) {
+        pstmt.setInt(index + 1, (int) args[index]);
+      } else if (args[index].getClass() == String.class) {
+        pstmt.setString(index + 1, (String) args[index]);
+      }
+    }
+
+    return pstmt;
   }
 }

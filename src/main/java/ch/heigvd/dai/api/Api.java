@@ -8,10 +8,12 @@ import io.javalin.Javalin;
 public class Api {
     private final Javalin app;
     private final Sqlite database;
+    private Inventory inventoryController;
 
     public Api(Sqlite database) {
         this.app = Javalin.create();
         this.database = database;
+        this.inventoryController = new Inventory(database);
     }
 
     public void start(int port) {
@@ -26,7 +28,7 @@ public class Api {
         app.patch("/user/me", ctx -> ctx.result("Update one or more param of my user"));
         app.delete("/user/me", ctx -> ctx.result("To delete my account"));
 
-        app.get("/myinvetory/{user_id}", Inventory::getInventory);
+        app.get("/myinvetory/{user_id}", inventoryController::getInventory);
 
         app.post("/register", ctx -> ctx.result("Création du compte"));
         app.post("/login", ctx -> ctx.result("Connextion"));
